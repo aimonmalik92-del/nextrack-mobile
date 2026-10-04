@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Timeline &amp; Progress - NEXTRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #F7ECDF;
+    color: #1A1A1A;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ============ Hamburger + Sidebar (matches homepage) ============ */
+.menu-btn {
+    position: fixed; top: 18px; left: 20px; z-index: 300;
+    background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; gap: 5px; padding: 8px;
+}
+.menu-btn span {
+    display: block; width: 22px; height: 2px;
+    background-color: #0D5C4D; border-radius: 2px; transition: all .3s ease;
+}
+.menu-btn.open span { background-color: #ffffff; }
+
+.sidebar {
+    width: 70px; background-color: #0D5C4D; height: 100vh;
+    position: fixed; left: -70px; top: 0;
+    display: flex; flex-direction: column; justify-content: space-between;
+    align-items: center; padding: 20px 0; z-index: 250; transition: left .3s ease;
+}
+.sidebar.open { left: 0; }
+.sidebar-logo { width:40px;height:40px;margin-top:48px;margin-bottom:18px;display:flex;align-items:center;justify-content:center;cursor:pointer; }
+.sidebar-logo-text { width:34px;height:34px;background:#fff;color:#0D5C4D;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px; }
+.sidebar-nav { display:flex;flex-direction:column;gap:6px;align-items:center; }
+.nav-item {
+    width:44px;height:44px;border-radius:10px;border:none;background:transparent;
+    color:rgba(255,255,255,.85);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:.2s;position:relative;
+}
+.nav-item:hover { background-color: rgba(255,255,255,.15); color:#fff; }
+.nav-item.active { background-color: rgba(255,255,255,.22); color:#fff; }
+.nav-item::after {
+    content: attr(data-tooltip); position:absolute; left:56px; top:50%; transform:translateY(-50%);
+    background:#1A1A1A; color:#fff; padding:6px 12px; border-radius:6px; font-size:13px;
+    white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .2s; z-index:300;
+}
+.nav-item:hover::after { opacity:1; }
+.sidebar-bottom { margin-bottom:10px; }
+.user-avatar { width:36px;height:36px;border-radius:50%;background:#2ECC71;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px; }
+
+/* ============ Top bar ============ */
+.top-bar {
+    margin: 0 auto;
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 22px 56px;
+}
+.brand-mini { display:flex; align-items:center; gap:10px; cursor:pointer; margin-left: 44px; }
+.brand-mini .dot { width:30px;height:30px;border-radius:8px;background:#0D5C4D;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px; }
+.brand-mini span { font-weight:700; color:#0D5C4D; font-size:15px; }
+.auth-buttons { display:flex; align-items:center; gap:20px; }
+.sign-in { color:#0D5C4D; text-decoration:none; font-weight:600; font-size:15px; }
+.sign-up { background:#0D5C4D; color:#fff; text-decoration:none; font-weight:600; font-size:14px; padding:10px 22px; border-radius:8px; }
+
+/* ============ Page heading ============ */
+.page-head { max-width:1320px; margin:0 auto; padding: 26px 56px 22px; }
+.page-head .eyebrow { color:#0D5C4D; font-size:12px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; margin-bottom:8px; }
+.page-head h1 { font-size:38px; font-weight:700; line-height:1.15; letter-spacing:-0.5px; margin-bottom:12px; }
+.page-head p { font-size:15px; color:#4a4a4a; line-height:1.7; max-width:820px; }
+.page-head p b { color:#0D5C4D; }
+.pt-wrap { max-width:1320px; margin:0 auto; padding: 0 56px 60px; }
+.footer { text-align:center; padding:24px; font-size:12.5px; color:#8a8a8a; }
+
+/* ============ Timeline app (scoped under .pt) ============ */
+.pt { --g:#0D5C4D; --g2:#0A4D3C; --mint:#3ddc97; --line:#E0D8CE; --soft:#E8F5F1; --muted:#6B6B6B; --crit:#C0392B; --warn:#B7791F;
+      --row:46px; font-size:13px; color:#1A1A1A; }
+.pt input, .pt select, .pt button, .pt textarea { font-family:'DM Sans',sans-serif; }
+
+.pt-controls { display:grid; grid-template-columns: repeat(6, 1fr); gap:12px; margin-bottom:14px; }
+.pt-kpi { background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 14px; min-width:0; }
+.pt-kpi small { display:block; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin-bottom:4px; }
+.pt-kpi b { font-size:18px; color:var(--g); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.pt-kpi b.bad { color:var(--crit); } .pt-kpi b.good { color:#1e7b3c; }
+.pt-kpi input { width:100%; border:1.5px solid var(--line); border-radius:8px; padding:6px 8px; font-size:13.5px; font-weight:600; color:var(--g); background:#FDFBF8; }
+.pt-kpi input:focus { outline:none; border-color:var(--g); }
+.pt-kpi .sub { font-size:11.5px; color:var(--muted); margin-top:2px; }
+.pt-pbar { height:6px; background:#EFEAE1; border-radius:4px; margin-top:7px; position:relative; overflow:hidden; }
+.pt-pbar i { position:absolute; left:0; top:0; bottom:0; background:var(--g); border-radius:4px; }
+.pt-pbar i.plan { background:transparent; border-right:2px solid var(--crit); }
+
+.pt-toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px; }
+.pt-seg { display:inline-flex; background:#fff; border:1px solid var(--line); border-radius:10px; padding:3px; }
+.pt-seg button { border:0; background:transparent; padding:6px 12px; border-radius:7px; font-size:12.5px; font-weight:600; color:var(--muted); cursor:pointer; }
+.pt-seg button.on { background:var(--g); color:#fff; }
+.pt-btn { border:1px solid var(--g); background:var(--g); color:#fff; border-radius:8px; padding:7px 14px; font-size:12.5px; font-weight:700; cursor:pointer; }
+.pt-btn:hover { background:var(--g2); }
+.pt-btn.ghost { background:#fff; color:var(--g); }
+.pt-btn.ghost:hover { background:var(--soft); }
+.pt-spacer { flex:1; }
+.pt-legend { display:flex; flex-wrap:wrap; gap:14px; font-size:11.5px; color:var(--muted); margin:0 0 10px; }
+.pt-legend span { display:inline-flex; align-items:center; gap:6px; }
+.pt-legend i { display:inline-block; width:22px; height:8px; border-radius:3px; }
+.pt-note { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:10px; }
+
+/* part selector buttons */
+.pt-tabs { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+.pt-tab { text-align:left; background:#fff; border:2px solid var(--line); border-radius:16px; padding:16px 18px; cursor:pointer; transition:.2s; display:flex; gap:14px; align-items:center; color:#1A1A1A; }
+.pt-tab:hover { border-color:var(--g); box-shadow:0 6px 20px rgba(13,92,77,.10); }
+.pt-tab.on { border-color:var(--g); background:var(--g); color:#fff; box-shadow:0 8px 24px rgba(13,92,77,.22); }
+.pt-tab-ic { flex:none; width:46px; height:46px; border-radius:12px; background:var(--soft); color:var(--g); display:flex; align-items:center; justify-content:center; }
+.pt-tab.on .pt-tab-ic { background:rgba(255,255,255,.16); color:#fff; }
+.pt-tab-tx { flex:1; min-width:0; }
+.pt-tab-tx small { display:block; font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; opacity:.7; }
+.pt-tab-tx b { display:block; font-size:19px; line-height:1.25; }
+.pt-tab-tx span { display:block; font-size:12.5px; opacity:.8; margin-top:2px; }
+.pt-tab-pct { flex:none; text-align:right; }
+.pt-tab-pct b { font-size:22px; display:block; font-variant-numeric:tabular-nums; }
+.pt-tab-pct span { font-size:11px; opacity:.75; }
+.pt-tab-go { font-size:12px; font-weight:700; margin-top:4px; color:var(--g); }
+.pt-tab.on .pt-tab-go { color:#fff; }
+.pt-part[hidden] { display:none; }
+
+/* two parts */
+.pt-part { margin-bottom:26px; }
+.pt-part-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-end; gap:12px 24px; margin:6px 0 10px; }
+.pt-part-no { display:inline-block; background:var(--g); color:#fff; font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; padding:3px 10px; border-radius:20px; margin-bottom:6px; }
+.pt-part-head h2 { font-size:22px; color:#1A1A1A; line-height:1.2; }
+.pt-part-sub { font-size:12.5px; color:var(--muted); margin-top:2px; }
+.pt-part-stats { display:flex; flex-wrap:wrap; gap:8px; }
+.pt-pill { background:#fff; border:1px solid var(--line); border-radius:10px; padding:6px 12px; font-size:11px; color:var(--muted); line-height:1.3; }
+.pt-pill b { display:block; font-size:13.5px; color:var(--g); font-variant-numeric:tabular-nums; }
+.pt-pill b.bad { color:var(--crit); } .pt-pill b.good { color:#1e7b3c; }
+
+/* grid + gantt */
+.pt-scroll { background:#fff; border:1px solid var(--line); border-radius:14px; position:relative; }
+.pt-table { display:flex; width:100%; }
+.pt-left { flex:none; background:#fff; border-right:2px solid var(--line); border-radius:14px 0 0 14px; }
+.pt-right { position:relative; flex:1; min-width:0; }
+.pt-left .pt-head { border-radius:13px 0 0 0; } .pt-right .pt-head { border-radius:0 13px 0 0; overflow:hidden; }
+.pt-body { overflow:hidden; border-radius:0 0 13px 0; }
+.pt-head { position:sticky; top:0; z-index:3; height:52px; background:var(--g); color:#fff; }
+.pt-left .pt-head { z-index:5; }
+.pt-cols { display:grid; grid-template-columns: 38px 236px 50px 96px 96px; }
+.pt-left .pt-head .pt-cols > div { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.3px; height:52px; display:flex; align-items:center; justify-content:center; text-align:center; padding:0 4px; border-right:1px solid rgba(255,255,255,.15); line-height:1.2; }
+.pt-left .pt-head .pt-cols > div.l { justify-content:flex-start; padding-left:10px; }
+.pt-row { height:var(--row); border-bottom:1px solid #F0EBE2; }
+.pt-left .pt-row > div { display:flex; align-items:center; justify-content:center; padding:0 5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums; font-size:12.5px; border-right:1px solid #F5F1E9; }
+.pt-left .pt-row > div.l { justify-content:flex-start; padding-left:10px; }
+.pt-left .pt-row > div.nm { display:block; line-height:var(--row); }
+.pt-left .pt-row > div.dt { flex-direction:column; gap:2px; font-size:11.5px; line-height:1.15; }
+.pt-left .pt-row > div.dt .pl { color:#9A9A9A; }
+.pt-left .pt-row > div.dt .ac { font-weight:600; }
+.pt-row.sum .dt .ac { font-weight:700; }
+.pt-row.act { cursor:pointer; }
+.pt-row.act:hover, .pt-row.hl { background:#F2FAF7; }
+.pt-row.sum { background:#FBF8F3; font-weight:700; }
+.pt-row.sum .nm { color:var(--g); cursor:pointer; }
+.pt-row.sum .nm::before { content:"▾ "; display:inline-block; width:14px; }
+.pt-row.sum.closed .nm::before { content:"▸ "; }
+.pt-row.ms { font-weight:700; }
+.pt-row.ms .nm { color:var(--g); }
+.pt-row.act .nm { padding-left:22px !important; }
+.pt-var.bad { color:var(--crit); font-weight:700; } .pt-var.good { color:#1e7b3c; font-weight:700; }
+.pt-crit-dot { color:var(--crit); font-weight:700; margin-right:4px; }
+.pt-qc { width:10px; height:10px; border-radius:50%; display:inline-block; background:#E0D8CE; }
+.pt-qc.q-done { background:#2ECC71; } .pt-qc.q-prog { background:#F2C94C; } .pt-qc.q-not { background:#E0D8CE; }
+
+.pt-scale { position:absolute; left:0; right:0; height:26px; display:block; }
+.pt-scale.top { top:0; border-bottom:1px solid rgba(255,255,255,.2); }
+.pt-scale.bot { top:26px; }
+.pt-tick { position:absolute; top:0; height:26px; font-size:11px; line-height:26px; padding-left:5px; border-left:1px solid rgba(255,255,255,.22); white-space:nowrap; overflow:hidden; }
+.pt-scale.top .pt-tick { font-weight:700; }
+.pt-body { position:relative; }
+.pt-gridline { position:absolute; top:0; bottom:0; width:1px; background:#F2EEE7; }
+.pt-gridline.major { background:#E6DFD3; }
+.pt-dd { position:absolute; top:0; bottom:0; width:0; border-left:2px dashed var(--crit); z-index:2; }
+.pt-dd span { position:absolute; top:2px; left:4px; font-size:10px; font-weight:700; color:var(--crit); background:#fff; padding:0 3px; border-radius:3px; white-space:nowrap; }
+.pt-grow { position:relative; }
+.pt-lane { position:absolute; left:0; right:0; top:22px; border-top:1px dashed #EFEAE1; }
+.pt-bl { position:absolute; top:6px; height:11px; background:#C9C2B5; border-radius:3px; }
+.pt-bar { position:absolute; top:26px; height:13px; border-radius:3px; background:#7FB8A8; overflow:hidden; }
+.pt-bar i { position:absolute; left:0; top:0; bottom:0; background:var(--g); }
+.pt-bar.crit { background:#E8A29A; } .pt-bar.crit i { background:var(--crit); }
+.pt-bar.done { background:#6B8F86; } .pt-bar.done i { background:#4A6A62; }
+.pt-lbl { position:absolute; top:25px; font-size:10.5px; color:var(--muted); white-space:nowrap; pointer-events:none; }
+.pt-lbl.pl { top:5px; color:#A39B8C; }
+.pt-sumbl { position:absolute; top:8px; height:7px; background:#C9C2B5; border-radius:2px; }
+.pt-sumbar { position:absolute; top:27px; height:8px; background:#1A1A1A; }
+.pt-sumbar::before, .pt-sumbar::after { content:""; position:absolute; bottom:-5px; border:5px solid transparent; border-top-color:#1A1A1A; }
+.pt-sumbar::before { left:-5px; } .pt-sumbar::after { right:-5px; }
+.pt-ms { position:absolute; top:26px; width:13px; height:13px; background:#1A1A1A; transform:rotate(45deg); margin-left:-6px; }
+.pt-ms.pl { top:5px; background:#C9C2B5; }
+.pt-ms.done { background:var(--g); }
+
+/* edit panel */
+.pt-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; display:flex; align-items:center; justify-content:center; padding:16px; }
+.pt-overlay[hidden] { display:none; }
+.pt-modal { background:#fff; border-radius:18px; width:100%; max-width:560px; max-height:92vh; overflow:auto; padding:26px 26px 22px; box-shadow:0 20px 60px rgba(0,0,0,.3); }
+.pt-modal h3 { font-size:18px; color:#1A1A1A; margin-bottom:4px; padding-right:30px; }
+.pt-modal .ph { font-size:12px; color:var(--muted); margin-bottom:16px; }
+.pt-close { float:right; border:0; background:none; font-size:26px; line-height:1; color:#999; cursor:pointer; }
+.pt-close:hover { color:#1A1A1A; }
+.pt-form { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.pt-f label { display:block; font-size:12px; font-weight:600; color:var(--g); margin-bottom:6px; }
+.pt-f input, .pt-f textarea { width:100%; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; font-size:14px; background:#FDFBF8; color:#1A1A1A; }
+.pt-f input:focus, .pt-f textarea:focus { outline:none; border-color:var(--g); }
+.pt-f .hint { font-size:11px; color:#9A9A9A; margin-top:4px; }
+.pt-f.full { grid-column:1/-1; }
+.pt-range { display:flex; gap:10px; align-items:center; }
+.pt-range input[type=range] { flex:1; accent-color:var(--g); padding:0; border:0; background:none; }
+.pt-range input[type=number] { width:80px; }
+.pt-info { margin-top:16px; background:#FBF8F3; border:1px solid var(--line); border-radius:12px; padding:12px 14px; display:grid; grid-template-columns:1fr 1fr; gap:8px 16px; font-size:12.5px; }
+.pt-info div span { display:block; color:var(--muted); font-size:11px; }
+.pt-info div b { font-variant-numeric:tabular-nums; }
+.pt-info div b .pt-qc { display:inline-block; vertical-align:-1px; margin-right:4px; }
+.pt-modal-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+.pt-modal-actions a { text-decoration:none; }
+
+@media (max-width: 980px) {
+  .pt-controls { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 760px) {
+  .pt-tabs { grid-template-columns:1fr; gap:10px; }
+  .pt-tab { padding:12px 14px; }
+  .pt-tab-tx b { font-size:17px; }
+  .top-bar { padding: 18px 20px; }
+  .brand-mini { margin-left: 40px; }
+  .page-head { padding: 16px 16px 18px; }
+  .page-head h1 { font-size:28px; }
+  .pt-wrap { padding: 0 16px 50px; }
+  .pt-controls { grid-template-columns: repeat(2, 1fr); gap:10px; }
+  .pt-cols { grid-template-columns: 26px 118px 34px; }
+  .pt-cols > .c-st, .pt-cols > .c-fi { display:none !important; }
+  .pt-lbl { display:none; }
+  .pt-left .pt-row > div.nm { font-size:11.5px; }
+  .pt-row.act .nm { padding-left:14px !important; }
+  .pt-form, .pt-info { grid-template-columns:1fr; }
+  .pt-modal { padding:22px 18px 18px; }
+}
+
+/* ============ Mobile polish (added): header, home screen, scrollable Gantt ============ */
+.bm-text { display:flex; flex-direction:column; line-height:1.1; }
+.bm-text small, .acct-btn, .logout-nav, .pm-homebox, .pm-bg, .pm-back { display:none; }
+html { -webkit-text-size-adjust:100%; }
+.sidebar { height:100vh; height:100dvh; overflow-y:auto; }
+.pt-part-head > *, .pt-scroll { min-width:0; }
+@media (hover: none) { .nav-item::after { display:none; } }
+.bg-deco{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;}
+.bg-deco::before{content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(13,92,77,.13) 1px, transparent 1.4px); background-size:26px 26px;
+  -webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 45%, transparent 35%, #000 85%); mask-image:radial-gradient(ellipse 70% 60% at 50% 45%, transparent 35%, #000 85%);}
+.bg-blob{position:absolute; border-radius:50%; filter:blur(50px); opacity:.55;}
+.bg-blob.b1{width:460px;height:460px;background:#CFE7DE;top:-140px;left:-120px;}
+.bg-blob.b2{width:520px;height:520px;background:#F1D9B5;bottom:-200px;right:-160px;opacity:.6;}
+.bg-blob.b3{width:300px;height:300px;background:#D9EDE6;top:38%;right:6%;opacity:.45;}
+.bg-city{position:absolute; left:0; right:0; bottom:calc(178px + env(safe-area-inset-bottom)); width:100%; height:150px;}
+@media screen and (max-width: 1100px) { .pt-controls { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media screen and (max-width: 760px) {
+  /* header like the other pages */
+  .top-bar { position:sticky; top:0; z-index:200; background:#fff; padding:0 16px; height:64px; box-shadow:0 1px 8px rgba(0,0,0,.08); }
+  .menu-btn, .menu-btn.open { top:12px; left:8px; padding:11px 10px; background:transparent; box-shadow:none; border-radius:10px; }
+  .menu-btn span { background-color:#2b2b2b; height:2px; }
+  .menu-btn.open span { background-color:#fff; }
+  .brand-mini { margin-left:44px; gap:10px; }
+  .brand-mini .dot { width:36px; height:36px; border-radius:50%; font-size:15px; font-style:italic; }
+  .bm-text b { font-size:20px; letter-spacing:-.2px; color:#15233A; }
+  .bm-text em { color:#0D5C4D; font-style:normal; }
+  .bm-text small { display:block; font-size:8.5px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:#E8652B; margin-top:3px; white-space:nowrap; }
+  .top-bar .auth-buttons { display:none; }
+  .acct-btn { display:flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:10px; background:#0D7A33; color:#fff; flex:none; text-decoration:none; -webkit-tap-highlight-color:transparent; }
+  .logout-nav { display:flex; margin-bottom:12px; }
+
+  /* ---- home screen ---- */
+  body.pm-home { overflow:hidden; height:100vh; height:100dvh; }
+  body.pm-home .pm-bg { display:block; }
+  body.pm-home .top-bar { background:transparent; box-shadow:none; }
+  body.pm-home .page-head, body.pm-home .pt-wrap, body.pm-home .footer { display:none; }
+  body.pm-home .pm-homebox { display:flex; flex-direction:column; position:fixed; top:64px; left:0; right:0; bottom:0; z-index:1; padding:0 16px calc(14px + env(safe-area-inset-bottom)); }
+  .pm-hero { display:flex; flex-direction:column; align-items:center; text-align:center; margin:auto 0; padding:0 4px; }
+  .pm-pill { display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.75); border:1px solid #E6DCCD; color:#0D5C4D; font-size:12.5px; font-weight:600; padding:6px 14px; border-radius:20px; margin-bottom:14px; backdrop-filter:blur(6px); }
+  .pm-pill i { width:8px; height:8px; border-radius:50%; background:#2ECC71; box-shadow:0 0 0 3px rgba(46,204,113,.2); }
+  .pm-hero h1 { margin:0 0 8px; font-size:30px; color:#0D5C4D; letter-spacing:-.3px; line-height:1.15; }
+  .pm-hero p { margin:0 0 18px; font-size:14px; color:#6B6B6B; line-height:1.45; max-width:300px; }
+  .pm-glance { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:100%; max-width:340px; }
+  .pm-glance div { background:rgba(255,255,255,.8); border:1px solid #EADFD0; border-radius:14px; padding:10px 4px; }
+  .pm-glance small { display:block; font-size:10.5px; color:#8A7F70; text-transform:uppercase; letter-spacing:.4px; margin-bottom:3px; }
+  .pm-glance b { font-size:15px; color:#0D5C4D; }
+  .pm-glance b.bad { color:#C0392B; } .pm-glance b.good { color:#1e7b3c; }
+  .pm-search { display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid #0D5C4D; border-radius:28px; height:54px; padding:5px 6px 5px 16px; box-shadow:0 4px 18px rgba(13,92,77,.10); color:#6B6B6B; flex:none; }
+  .pm-search input { flex:1; min-width:0; border:0; outline:0; background:transparent; font:inherit; font-size:16px; color:#1A1A1A; -webkit-appearance:none; appearance:none; }
+  .pm-search button { width:40px; height:40px; border:0; border-radius:50%; background:#0D5C4D; color:#fff; font-size:18px; cursor:pointer; flex:none; }
+  .pm-msg { min-height:18px; font-size:12.5px; color:#a1192b; text-align:center; padding:4px 0 6px; flex:none; }
+  .pm-dock { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; flex:none; }
+  .pm-dock button { display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 2px 10px; background:rgba(255,255,255,.88); border:1px solid #EADFD0; border-radius:16px; color:#0D5C4D; font-family:inherit; font-size:11.5px; font-weight:600; line-height:1.2; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .pm-dock span { text-align:center; }
+  .pm-dock button:active { background:#E8F5F1; border-color:#0D5C4D; }
+
+  /* ---- inner views ---- */
+  body:not(.pm-home) .pm-back { display:inline-flex; align-items:center; margin:14px 16px 0; padding:8px 16px; border:1.5px solid #0D5C4D; background:#fff; color:#0D5C4D; border-radius:20px; font:700 13px 'DM Sans',sans-serif; cursor:pointer; }
+  .page-head { display:none; }
+  .pt-tabs { display:none; }
+  .pt-wrap { padding:12px 12px 40px; }
+  body.pm-p1 .pt-controls, body.pm-p2 .pt-controls, body.pm-p1 .pt-note, body.pm-p2 .pt-note,
+  body.pm-ov .pt-part, body.pm-ov .pt-tabs { display:none; }
+  body.pm-p1 .pt-toolbar > :not(#pt-expand), body.pm-p2 .pt-toolbar > :not(#pt-expand) { display:none; }
+  body.pm-ov .pt-legend { display:none; }
+  .pt-controls { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .pt-kpi { padding:11px 12px; }
+  .pt-kpi input { font-size:16px; padding:9px 8px; }
+  .pt-kpi b { font-size:16px; }
+  .pt-toolbar .pt-btn { padding:10px 14px; font-size:13px; }
+  .pt-legend { flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; gap:14px; font-size:11px; margin-bottom:8px; padding-bottom:4px; }
+  .pt-legend span { flex:none; white-space:nowrap; }
+  .pt-toolbar { margin-bottom:8px; }
+  .pt-toolbar .pt-btn { line-height:1.2; }
+  .pt-part-head { margin-top:2px; }
+  .pt-part-head h2 { font-size:20px; }
+  .pt-part-stats { flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%; padding-bottom:4px; }
+  .pt-pill { flex:none; }
+
+  /* Gantt: sticky left columns, chart scrolls sideways */
+  .pt-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .pt-table { min-width:860px; }
+  .pt-left { position:sticky; left:0; z-index:6; }
+  .pt-cols { grid-template-columns:26px 132px 36px; }
+  .pt-left .pt-row > div.nm { display:flex; align-items:center; white-space:normal; line-height:1.15; font-size:11px; padding-right:4px; }
+  .pt-left .pt-head .pt-cols > div { font-size:9.5px; }
+
+  /* edit panel = bottom sheet */
+  .pt-overlay { align-items:flex-end; padding:0; }
+  .pt-modal { max-width:none; border-radius:20px 20px 0 0; max-height:92vh; max-height:92dvh; padding:20px 16px calc(18px + env(safe-area-inset-bottom)); }
+  .pt-f input, .pt-f textarea { font-size:16px; }
+  .pt-form { grid-template-columns:1fr 1fr; gap:12px; }
+  .pt-f.full { grid-column:1/-1; }
+  .pt-info { grid-template-columns:1fr 1fr; }
+  .pt-modal-actions { display:grid; grid-template-columns:1fr 1fr; }
+  .pt-modal-actions .pt-btn { text-align:center; padding:11px 8px; }
+  .pt-modal-actions .pt-spacer { display:none; }
+  .pt-modal-actions #pt-m-done { grid-column:1/-1; padding:13px; font-size:14px; }
+}
+
+/* ---- activity cards timeline (phone) ---- */
+.pm-vh, .pm-cards, .pm-fdock { display:none; }
+@media screen and (max-width: 760px) {
+  body:not(.pm-home) .pm-back { display:none; }
+  body.pm-p1 .pm-vh, body.pm-p2 .pm-vh, body.pm-ov .pm-vh { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:2px 0 14px; }
+  .pm-vh h2 { font-size:18px; font-weight:700; color:#1A1A1A; text-align:center; flex:1; }
+  .pm-circ { flex:none; width:44px; height:44px; border-radius:50%; border:0; background:#fff; color:#1A1A1A; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(60,40,10,.08); cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .pm-circ.sq { border-radius:14px; }
+  body.pm-p1 .pm-cards, body.pm-p2 .pm-cards { display:block; }
+  body.pm-p1:not(.pm-gantt) .pt-part, body.pm-p2:not(.pm-gantt) .pt-part,
+  body.pm-p1:not(.pm-gantt) .pt-toolbar, body.pm-p2:not(.pm-gantt) .pt-toolbar,
+  body.pm-p1:not(.pm-gantt) .pt-legend, body.pm-p2:not(.pm-gantt) .pt-legend { display:none; }
+  body.pm-gantt #pmChips, body.pm-gantt #pmTl, body.pm-gantt .pm-sort { display:none; }
+  body.pm-gantt .pm-sortrow { justify-content:flex-end; }
+  body.pm-gantt #pmGanttBtn { background:#1A1A1A; color:#fff; }
+  .pt-wrap { padding-bottom:110px; }
+  .pm-chips { display:flex; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; margin:0 -12px 12px; padding:0 12px 2px; scrollbar-width:none; }
+  .pm-chips::-webkit-scrollbar { display:none; }
+  .pm-chip { flex:none; border:0; background:#fff; color:#1A1A1A; font:600 13.5px 'DM Sans',sans-serif; padding:12px 18px; border-radius:26px; cursor:pointer; box-shadow:0 2px 8px rgba(60,40,10,.06); white-space:nowrap; }
+  .pm-chip.on { background:#1A1A1A; color:#fff; }
+  .pm-sortrow { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:16px; }
+  .pm-sort { display:inline-flex; align-items:center; gap:6px; background:#fff; border-radius:22px; padding:0 12px 0 16px; height:44px; font-size:13px; color:#6B6B6B; box-shadow:0 2px 8px rgba(60,40,10,.06); }
+  .pm-sort select { border:0; background:transparent; font:700 13px 'DM Sans',sans-serif; color:#1A1A1A; padding:10px 2px; outline:0; }
+  .pm-tl { position:relative; padding-left:36px; }
+  .pm-empty { text-align:center; color:#8A7F70; font-size:14px; padding:30px 0; }
+  .pm-it { --c:#B9B0A2; position:relative; margin-bottom:14px; }
+  .pm-it.s-prog { --c:#F26A1B; } .pm-it.s-done { --c:#1FA33A; } .pm-it.s-late { --c:#E5383B; }
+  .pm-it::before { content:""; position:absolute; left:-27px; top:40px; bottom:-18px; width:2px; background:var(--c); opacity:.35; }
+  .pm-it:last-child::before { display:none; }
+  .pm-dot { position:absolute; left:-36px; top:20px; width:20px; height:20px; border-radius:50%; border:3px solid var(--c); background:var(--c); box-shadow:inset 0 0 0 3px #fff; }
+  .pm-card { background:#fff; border-radius:20px; padding:14px 14px 12px; box-shadow:0 4px 18px rgba(60,40,10,.07); cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .pm-card:active { transform:scale(.99); }
+  .pm-top { display:flex; align-items:center; gap:12px; }
+  .pm-ico { flex:none; width:44px; height:44px; border-radius:50%; background:var(--c); color:#fff; display:flex; align-items:center; justify-content:center; }
+  .pm-tx { flex:1; min-width:0; }
+  .pm-tx b { display:block; font-size:14.5px; line-height:1.25; color:#1A1A1A; }
+  .pm-tx small { display:block; margin-top:3px; font-size:12px; color:#8A7F70; }
+  .pm-pill2 { flex:none; align-self:flex-start; font-size:11px; font-weight:600; color:var(--c); border:1px solid var(--c); background:#fff; padding:4px 10px; border-radius:14px; white-space:nowrap; }
+  .pm-mid { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:14px 0 12px; font-size:12px; color:#555; }
+  .pm-mid span { display:inline-flex; align-items:center; gap:8px; min-width:0; }
+  .pm-mid em { font-style:normal; display:inline-flex; align-items:center; gap:5px; font-size:11.5px; color:#6B6B6B; background:#F4EFE6; padding:4px 9px; border-radius:12px; white-space:nowrap; }
+  .pm-mid em i { width:8px; height:8px; border-radius:50%; background:#E0D8CE; display:inline-block; }
+  .pm-mid em i.q-done { background:#2ECC71; } .pm-mid em i.q-prog { background:#F2C94C; }
+  .pm-prog { display:flex; align-items:center; gap:12px; }
+  .pm-bar { position:relative; flex:1; height:8px; border-radius:6px; background:#EFE9DF; }
+  .pm-bar i { position:absolute; left:0; top:0; bottom:0; border-radius:6px; background:var(--c); }
+  .pm-bar u { position:absolute; top:50%; width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; background:#fff; border:2px solid var(--c); box-shadow:0 2px 6px rgba(0,0,0,.18); text-decoration:none; }
+  .pm-prog b { flex:none; min-width:38px; text-align:right; font-size:13px; color:#1A1A1A; font-variant-numeric:tabular-nums; }
+
+
+  /* overall summary card + month strip */
+  .pm-sum { position:relative; overflow:hidden; background:linear-gradient(135deg,#0F7A64 0%,#0D5C4D 55%,#0A4D3C 100%); color:#fff; border-radius:24px; padding:20px 20px 18px; margin-bottom:16px; box-shadow:0 10px 26px rgba(13,92,77,.28); }
+  .pm-sum::before { content:""; position:absolute; right:-50px; top:-60px; width:190px; height:190px; border-radius:50%; background:rgba(255,255,255,.09); }
+  .pm-sum::after { content:""; position:absolute; right:30px; bottom:-70px; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,.06); }
+  .pm-sum > * { position:relative; z-index:1; }
+  .pm-sum .eb { font-size:13px; opacity:.85; margin-bottom:6px; }
+  .pm-sum h3 { font-size:28px; line-height:1.1; font-weight:700; letter-spacing:-.4px; margin-bottom:14px; }
+  .pm-sum .rng { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:13px; margin-bottom:4px; }
+  .pm-sum .rng b { font-weight:700; }
+  .pm-sum .mchip { background:rgba(255,255,255,.18); border-radius:12px; padding:3px 10px; font-size:12px; font-weight:600; }
+  .pm-sum .stt { display:flex; align-items:center; gap:7px; font-size:13px; font-weight:600; margin:8px 0 14px; }
+  .pm-sum .stt i { width:9px; height:9px; border-radius:50%; background:#6EE7A8; box-shadow:0 0 0 3px rgba(110,231,168,.25); }
+  .pm-sum .stt.late i { background:#FF8A80; box-shadow:0 0 0 3px rgba(255,138,128,.25); }
+  .pm-sum .stt.idle i { background:#E5E0D5; box-shadow:0 0 0 3px rgba(229,224,213,.25); }
+  .pm-sum .bar { height:8px; border-radius:6px; background:rgba(255,255,255,.22); overflow:hidden; margin-bottom:6px; }
+  .pm-sum .bar i { display:block; height:100%; background:#fff; border-radius:6px; }
+  .pm-sum .bl { display:flex; justify-content:space-between; font-size:11.5px; opacity:.9; margin-bottom:14px; }
+  .pm-sum .grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+  .pm-sum .grid div { background:rgba(255,255,255,.14); border-radius:12px; padding:8px 6px; text-align:center; }
+  .pm-sum .grid small { display:block; font-size:9.5px; text-transform:uppercase; letter-spacing:.3px; opacity:.8; margin-bottom:3px; white-space:nowrap; }
+  .pm-sum .grid b { font-size:13px; white-space:nowrap; }
+  .pm-months { display:flex; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; margin:0 -12px 14px; padding:0 12px 4px; scrollbar-width:none; }
+  .pm-months::-webkit-scrollbar { display:none; }
+  .pm-mo { flex:none; min-width:58px; border:1.5px solid #E0D8CE; background:#fff; border-radius:12px; padding:8px 6px 7px; text-align:center; cursor:pointer; font-family:inherit; color:#1A1A1A; -webkit-tap-highlight-color:transparent; }
+  .pm-mo b { display:block; font-size:13px; }
+  .pm-mo small { display:block; font-size:10px; color:#8A7F70; margin-top:2px; }
+  .pm-mo.now { border-color:#0D5C4D; }
+  .pm-mo.on { background:#0D5C4D; border-color:#0D5C4D; color:#fff; }
+  .pm-mo.on small { color:rgba(255,255,255,.75); }
+  body.pm-gantt .pm-months { display:none; }
+
+  /* floating dock */
+  body.pm-p1 .pm-fdock, body.pm-p2 .pm-fdock, body.pm-ov .pm-fdock { display:flex; position:fixed; left:50%; transform:translateX(-50%); bottom:calc(14px + env(safe-area-inset-bottom)); z-index:150; gap:4px; padding:7px; background:rgba(255,255,255,.82); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.9); border-radius:40px; box-shadow:0 8px 28px rgba(40,30,10,.18); }
+  .pm-fdock button { width:54px; height:50px; border:0; border-radius:28px; background:transparent; color:#4a4a4a; display:flex; align-items:center; justify-content:center; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  body.pm-p1 .pm-fdock [data-v="1"], body.pm-p2 .pm-fdock [data-v="2"], body.pm-ov .pm-fdock [data-v="ov"] { background:#1A1A1A; color:#fff; width:62px; }
+}
+@media screen and (max-width: 760px) and (max-height: 660px) { .bg-city { height:100px; bottom:150px; } .pm-hero p { display:none; } }
+@media screen and (max-width: 380px) { .pt-form { grid-template-columns:1fr; } }
+@media print {
+  @page { size: A3 landscape; margin: 10mm; }
+  .menu-btn, .sidebar, .top-bar, .page-head, .footer, .pt-toolbar, .pt-note, .pt-overlay { display:none !important; }
+  .pt-wrap { padding:0; max-width:none; }
+  .pt-scroll { max-height:none; overflow:visible; border:0; }
+  .pt-head { position:static; }
+  .pt-controls { grid-template-columns: repeat(6, 1fr); }
+  * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+}
+</style>
+</head>
+<body class="pm-home">
+
+<button class="menu-btn" id="menuBtn"><span></span><span></span><span></span></button>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+        <div class="sidebar-logo" onclick="window.location.href='app.html'" title="Back to NEXTRACK Assistant">
+            <div class="sidebar-logo-text">N</div>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="nav-item" data-tooltip="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            </button>
+            <button class="nav-item" data-tooltip="New Chat">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+            </button>
+            <button class="nav-item" data-tooltip="Calculate Budget" onclick="window.location.href='calculate-budget.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"></rect><path d="M8 6h8M8 10h8M8 14h4"></path></svg>
+            </button>
+            <button class="nav-item" data-tooltip="Construction SOP's">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            </button>
+            <button class="nav-item" data-tooltip="Quality Checklists" onclick="window.location.href='quality-checklist.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            </button>
+            <button class="nav-item" data-tooltip="Project" onclick="window.location.href='budget-tracking-system.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </button>
+            <button class="nav-item" data-tooltip="History">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </button>
+        </nav>
+    </div>
+    <div class="sidebar-bottom">
+        <button class="nav-item logout-nav" data-tooltip="Log out" aria-label="Log out" onclick="try{localStorage.removeItem('nextrack-user')}catch(e){};window.location.href='index.html'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+        </button>
+        <div class="user-avatar"><span>B</span></div>
+    </div>
+</aside>
+
+<header class="top-bar">
+    <div class="brand-mini" onclick="window.location.href='app.html'">
+        <div class="dot">N</div>
+        <span class="bm-text"><b>NEX<em>TRACK</em></b><small>Your Home. Our Priority.</small></span>
+    </div>
+    <div class="auth-buttons">
+        <a href="app.html" class="sign-in">My Account</a>
+        <a href="index.html" class="sign-up" onclick="try{localStorage.removeItem('nextrack-user')}catch(e){}">Log out</a>
+    </div>
+    <a href="app.html" class="acct-btn" aria-label="My Account">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+    </a>
+</header>
+
+<div class="bg-deco pm-bg" aria-hidden="true">
+        <div class="bg-blob b1"></div><div class="bg-blob b2"></div><div class="bg-blob b3"></div>
+        <svg class="bg-city" viewBox="0 0 1600 230" preserveAspectRatio="xMidYMax slice" fill="none" stroke="#0D5C4D" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <g opacity=".35">
+                <!-- ground line -->
+                <path d="M0 220 H1600"/>
+                <!-- left: finished house -->
+                <path d="M60 220 V130 L150 70 L240 130 V220"/><path d="M40 138 L150 62 L260 138"/>
+                <rect x="85" y="150" width="34" height="30"/><rect x="180" y="150" width="34" height="30"/><path d="M135 220 V178 H165 V220"/>
+                <!-- tree -->
+                <path d="M300 220 V180"/><circle cx="300" cy="165" r="22"/>
+                <!-- middle-left: two-storey under construction with scaffolding -->
+                <path d="M380 220 V90 H560 V220"/><path d="M370 150 H570"/><path d="M370 90 H570"/>
+                <path d="M420 220 V90 M470 220 V90 M520 220 V90" stroke-dasharray="4 5"/>
+                <path d="M355 220 V70 M380 70 H355 M355 120 H380 M355 170 H380"/><path d="M355 120 L380 170 M380 120 L355 170"/>
+                <rect x="400" y="105" width="30" height="30"/><rect x="495" y="105" width="30" height="30"/>
+            </g>
+            <g opacity=".3">
+                <!-- right: crane -->
+                <path d="M1320 220 V40"/><path d="M1334 220 V40"/>
+                <path d="M1320 60 L1334 80 M1334 80 L1320 100 M1320 100 L1334 120 M1334 120 L1320 140 M1320 140 L1334 160 M1320 160 L1334 180 M1334 180 L1320 200"/>
+                <path d="M1180 40 H1540"/><path d="M1180 52 H1540"/><path d="M1327 40 L1327 18 L1200 40 M1327 18 L1540 40"/>
+                <path d="M1480 52 V120"/><path d="M1468 120 H1492 V136 H1468 Z"/>
+                <rect x="1200" y="52" width="40" height="22"/>
+                <!-- right building frame -->
+                <path d="M1380 220 V120 H1560 V220"/><path d="M1380 170 H1560"/><path d="M1440 220 V120 M1500 220 V120"/>
+                <path d="M1390 120 V104 M1450 120 V104 M1510 120 V104 M1550 120 V104"/>
+            </g>
+            <g opacity=".22">
+                <!-- small homes in the distance -->
+                <path d="M700 220 V185 L730 165 L760 185 V220"/><path d="M780 220 V190 L805 172 L830 190 V220"/>
+                <path d="M1010 220 V180 L1045 158 L1080 180 V220"/><path d="M1100 220 V192 L1122 176 L1144 192 V220"/>
+                <path d="M880 220 V200"/><circle cx="880" cy="190" r="14"/><path d="M960 220 V196"/><circle cx="960" cy="184" r="17"/>
+            </g>
+        </svg>
+    </div>
+
+<!-- PHONE HOME (clean: title, glance, search bar, buttons) -->
+<div class="pm-homebox" id="pmHome">
+    <div class="pm-hero">
+        <div class="pm-pill"><i></i><span>Planning &amp; Progress · 25 activities</span></div>
+        <h1>Project Timeline</h1>
+        <p>Schedule, Gantt chart aur progress, site handover se final handover tak</p>
+        <div class="pm-glance">
+            <div><small>Actual</small><b id="pmAct">0%</b></div>
+            <div><small>Planned</small><b id="pmPlan">0%</b></div>
+            <div><small>Variance</small><b id="pmVar">0 d</b></div>
+        </div>
+    </div>
+    <form class="pm-search" id="pmSearch" autocomplete="off">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="pmInput" type="search" placeholder="Find an activity, e.g. slab or 12" aria-label="Find an activity (opens it to update progress)">
+        <button type="submit" aria-label="Open">↑</button>
+    </form>
+    <div class="pm-msg" id="pmMsg" aria-live="polite"></div>
+    <nav class="pm-dock" aria-label="Quick actions">
+        <button type="button" data-v="1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg><span>Grey Structure</span></button>
+        <button type="button" data-v="2"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a2 2 0 0 1 2 2v3H4zM18 7h2v6h-8v3"/><rect x="10" y="16" width="4" height="5" rx="1"/></svg><span>Finishing</span></button>
+        <button type="button" data-v="ov"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V11M12 21V4M18 21v-7"/></svg><span>Dates &amp; Summary</span></button>
+    </nav>
+</div>
+<button type="button" class="pm-back" id="pmBack">‹ Home</button>
+<nav class="pm-fdock" id="pmFDock" aria-label="Sections">
+    <button type="button" data-v="home" aria-label="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg></button>
+    <button type="button" data-v="1" aria-label="Grey Structure"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/></svg></button>
+    <button type="button" data-v="2" aria-label="Finishing"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H5zM18 6.5h2V12h-8v3"/><rect x="10" y="15" width="4" height="6" rx="1"/></svg></button>
+    <button type="button" data-v="ov" aria-label="Dates and summary"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V11M12 21V4M18 21v-7"/></svg></button>
+</nav>
+
+
+<section class="page-head">
+    <div class="eyebrow">Planning &amp; Progress</div>
+    <h1>Project Timeline &amp; Real-Time Progress</h1>
+    <p>A Primavera-style schedule of all <b>25 construction activities</b>, from site handover to final handover. Set your project start date, then click any activity to update its <b>% complete and actual dates</b>. The Gantt chart re-schedules automatically and shows the <b>critical path</b>, the <b>baseline vs forecast</b> and any delay.</p>
+</section>
+
+<main class="pt-wrap">
+<div class="pt" id="pt-app">
+
+  <div class="pm-vh" id="pmVH">
+    <button type="button" class="pm-circ" id="pmVBack" aria-label="Back to home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+    <h2 id="pmVTitle">Grey Structure</h2>
+    <button type="button" class="pm-circ" id="pmVSum" aria-label="Dates and summary"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></button>
+  </div>
+  <div class="pm-cards" id="pmCards">
+    <div class="pm-sum" id="pmSum"></div>
+    <div class="pm-months" id="pmMonths"></div>
+    <div class="pm-chips" id="pmChips"></div>
+    <div class="pm-sortrow">
+      <label class="pm-sort"><span>Sort by:</span>
+        <select id="pmSort" aria-label="Sort activities"><option value="due">Due Date</option><option value="start">Start Date</option><option value="prog">Progress</option><option value="no">Activity No.</option></select></label>
+      <button type="button" class="pm-circ sq" id="pmGanttBtn" aria-label="Switch between cards and Gantt chart"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></button>
+    </div>
+    <div class="pm-tl" id="pmTl"></div>
+  </div>
+
+  <div class="pt-tabs" role="tablist" aria-label="Project part">
+    <button type="button" class="pt-tab" role="tab" data-part="1" id="pt-tab-1">
+      <span class="pt-tab-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 10h.01M15 10h.01"/></svg></span>
+      <span class="pt-tab-tx"><small>Part 1</small><b>Grey Structure</b><span id="pt-tab-d-1"></span></span>
+      <span class="pt-tab-pct"><b id="pt-tab-p-1">0%</b><span>done</span><div class="pt-tab-go">View details ›</div></span>
+    </button>
+    <button type="button" class="pt-tab" role="tab" data-part="2" id="pt-tab-2">
+      <span class="pt-tab-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h12v5H4z"/><path d="M16 6h3v5h-8v3"/><path d="M10 14h2v7h-2z"/></svg></span>
+      <span class="pt-tab-tx"><small>Part 2</small><b>Finishing</b><span id="pt-tab-d-2"></span></span>
+      <span class="pt-tab-pct"><b id="pt-tab-p-2">0%</b><span>done</span><div class="pt-tab-go">View details ›</div></span>
+    </button>
+  </div>
+
+  <div class="pt-controls">
+    <div class="pt-kpi"><small>Project start</small><input type="date" id="pt-start"></div>
+    <div class="pt-kpi"><small>Data date (status as of)</small><input type="date" id="pt-dd"></div>
+    <div class="pt-kpi"><small>Baseline finish</small><b id="pt-k-bf">–</b><div class="sub" id="pt-k-bdur"></div></div>
+    <div class="pt-kpi"><small>Forecast finish</small><b id="pt-k-ff">–</b><div class="sub" id="pt-k-fdur"></div></div>
+    <div class="pt-kpi"><small>Schedule variance</small><b id="pt-k-var">–</b><div class="sub" id="pt-k-vars"></div></div>
+    <div class="pt-kpi"><small>Actual vs planned</small><b id="pt-k-pct">–</b>
+      <div class="pt-pbar" title="Green = actual, red line = planned as of data date"><i id="pt-k-bar"></i><i class="plan" id="pt-k-plan"></i></div></div>
+  </div>
+
+  <div class="pt-toolbar">
+    <button class="pt-btn ghost" type="button" id="pt-expand">Collapse all</button>
+    <span class="pt-spacer"></span>
+    <button class="pt-btn ghost" type="button" id="pt-reset">Reset schedule</button>
+    <button class="pt-btn ghost" type="button" id="pt-baseline">Update baseline</button>
+    <button class="pt-btn" type="button" onclick="window.print()">Print</button>
+  </div>
+
+  <div class="pt-legend">
+    <span><i style="background:#C9C2B5"></i>Planned (baseline) &ndash; top line</span>
+    <span><i style="background:linear-gradient(90deg,#0D5C4D 50%,#7FB8A8 50%)"></i>Actual / forecast &ndash; bottom line (dark = work done)</span>
+    <span><i style="background:linear-gradient(90deg,#C0392B 50%,#E8A29A 50%)"></i>Critical path</span>
+    <span><i style="background:#6B8F86"></i>Completed</span>
+    <span><i style="background:#1A1A1A;height:6px"></i>Phase summary</span>
+    <span><i style="border-left:2px dashed #C0392B;width:2px;height:12px;border-radius:0"></i>Data date</span>
+  </div>
+  <p class="pt-note" id="pt-note"></p>
+
+  <section class="pt-part" id="pt-part-1">
+    <div class="pt-part-head">
+      <div><span class="pt-part-no">Part 1</span><h2>Grey Structure</h2><p class="pt-part-sub">Drawings, foundation, RCC frame, masonry, concealed MEP, plaster &amp; waterproofing</p></div>
+      <div class="pt-part-stats" id="pt-pstats-1"></div>
+    </div>
+    <div class="pt-scroll">
+      <div class="pt-table">
+        <div class="pt-left">
+          <div class="pt-head"><div class="pt-cols">
+            <div>ID</div><div class="l">Activity name</div><div>Dur (days)</div><div class="c-st">Start<br>Plan / Actual</div><div class="c-fi">Finish<br>Plan / Actual</div>
+          </div></div>
+          <div id="pt-lrows-1"></div>
+        </div>
+        <div class="pt-right" id="pt-right-1">
+          <div class="pt-head" id="pt-rhead-1"></div>
+          <div class="pt-body" id="pt-rbody-1"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pt-part" id="pt-part-2">
+    <div class="pt-part-head">
+      <div><span class="pt-part-no">Part 2</span><h2>Finishing</h2><p class="pt-part-sub">Tiling, doors &amp; windows, ceiling, paint, fixtures, external works &amp; handover</p></div>
+      <div class="pt-part-stats" id="pt-pstats-2"></div>
+    </div>
+    <div class="pt-scroll">
+      <div class="pt-table">
+        <div class="pt-left">
+          <div class="pt-head"><div class="pt-cols">
+            <div>ID</div><div class="l">Activity name</div><div>Dur (days)</div><div class="c-st">Start<br>Plan / Actual</div><div class="c-fi">Finish<br>Plan / Actual</div>
+          </div></div>
+          <div id="pt-lrows-2"></div>
+        </div>
+        <div class="pt-right" id="pt-right-2">
+          <div class="pt-head" id="pt-rhead-2"></div>
+          <div class="pt-body" id="pt-rbody-2"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- activity edit panel -->
+  <div class="pt-overlay" id="pt-overlay" hidden>
+    <div class="pt-modal" role="dialog" aria-modal="true" aria-labelledby="pt-m-title">
+      <button class="pt-close" type="button" id="pt-m-close" aria-label="Close">×</button>
+      <h3 id="pt-m-title"></h3>
+      <p class="ph" id="pt-m-phase"></p>
+      <div class="pt-form">
+        <div class="pt-f"><label for="pt-m-dur">Original duration (days)</label><input type="number" min="1" id="pt-m-dur"></div>
+        <div class="pt-f"><label for="pt-m-pred">Predecessors</label><input id="pt-m-pred" placeholder="e.g. 5, 2"><div class="hint">IDs, comma separated. Lag: 14+3 or 14-10</div></div>
+        <div class="pt-f full"><label for="pt-m-pct">% complete</label>
+          <div class="pt-range"><input type="range" min="0" max="100" step="5" id="pt-m-pctr"><input type="number" min="0" max="100" id="pt-m-pct"></div></div>
+        <div class="pt-f"><label for="pt-m-as">Actual start</label><input type="date" id="pt-m-as"></div>
+        <div class="pt-f"><label for="pt-m-af">Actual finish</label><input type="date" id="pt-m-af"></div>
+        <div class="pt-f full"><label for="pt-m-rem">Remarks</label><input id="pt-m-rem" placeholder="Reason for delay, notes…"></div>
+      </div>
+      <div class="pt-info" id="pt-m-info"></div>
+      <div class="pt-modal-actions">
+        <button class="pt-btn ghost" type="button" id="pt-m-startnow">Started on data date</button>
+        <button class="pt-btn ghost" type="button" id="pt-m-donenow">Completed on data date</button>
+        <button class="pt-btn ghost" type="button" id="pt-m-clear">Clear progress</button>
+        <a class="pt-btn ghost" id="pt-m-qc" href="#">Open quality checklist</a>
+        <span class="pt-spacer"></span>
+        <button class="pt-btn" type="button" id="pt-m-done">Done</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<footer class="footer">
+    Residential Construction • AI-Powered Project Control
+</footer>
+
+<script>
+const menuBtn = document.getElementById('menuBtn');
+const sidebar = document.getElementById('sidebar');
+menuBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    menuBtn.classList.toggle('open');
+});
+</script>
+
+<script>
+(function () {
+  /* ====== ACTIVITIES (same as the Quality Checklists). Edit default durations / predecessors here ======
+     part = 1 Grey Structure, 2 Finishing
+     dur  = original duration in calendar days
+     pred = predecessor IDs (finish-to-start). "14-10" = start 10 days before 14 finishes, "14+3" = 3 days after */
+  var ACTS = [
+    {"part": 1, "phase": "Pre-Construction", "title": "SITE HANDOVER & MOBILIZATION", "items": 7, "dur": 7, "pred": ""},
+    {"part": 1, "phase": "Pre-Construction", "title": "RECEIVING OF STRUCTURAL & ARCHITECTURAL DRAWINGS", "items": 5, "dur": 5, "pred": ""},
+    {"part": 1, "phase": "Pre-Construction", "title": "RECEIVING OF MEP DRAWINGS", "items": 5, "dur": 10, "pred": "2"},
+    {"part": 1, "phase": "Pre-Construction", "title": "RECEIVING OF FINISHING BOOK", "items": 4, "dur": 20, "pred": "3"},
+    {"part": 1, "phase": "Substructure", "title": "LAYOUT & SETTING OUT", "items": 5, "dur": 3, "pred": "1, 2"},
+    {"part": 1, "phase": "Substructure", "title": "EXCAVATION", "items": 6, "dur": 10, "pred": "5"},
+    {"part": 1, "phase": "Substructure", "title": "ANTI-TERMITE, SOLING & PCC (BLINDING)", "items": 5, "dur": 5, "pred": "6"},
+    {"part": 1, "phase": "Substructure", "title": "FOUNDATION STEEL & SHUTTERING (PRE-POUR)", "items": 7, "dur": 10, "pred": "7"},
+    {"part": 1, "phase": "Substructure", "title": "FOUNDATION CONCRETING & CURING", "items": 5, "dur": 10, "pred": "8"},
+    {"part": 1, "phase": "Substructure", "title": "PLINTH BEAM, DPC & BACKFILLING", "items": 5, "dur": 12, "pred": "9"},
+    {"part": 1, "phase": "Superstructure", "title": "COLUMNS (STEEL, SHUTTERING & POUR)", "items": 6, "dur": 14, "pred": "10"},
+    {"part": 1, "phase": "Superstructure", "title": "BEAM & SLAB SHUTTERING / REINFORCEMENT (PRE-POUR)", "items": 8, "dur": 18, "pred": "11"},
+    {"part": 1, "phase": "Superstructure", "title": "SLAB CONCRETING & CURING", "items": 6, "dur": 14, "pred": "12"},
+    {"part": 1, "phase": "Superstructure", "title": "BRICK / BLOCK MASONRY", "items": 7, "dur": 35, "pred": "13"},
+    {"part": 1, "phase": "MEP Rough-In", "title": "ELECTRICAL CONDUITING (CONCEALED)", "items": 6, "dur": 15, "pred": "14-10, 3"},
+    {"part": 1, "phase": "MEP Rough-In", "title": "PLUMBING & DRAINAGE (CONCEALED) + PRESSURE TEST", "items": 7, "dur": 15, "pred": "14-10, 3"},
+    {"part": 1, "phase": "Plaster & Waterproofing", "title": "WATERPROOFING (ROOF & WET AREAS)", "items": 6, "dur": 10, "pred": "16, 13"},
+    {"part": 1, "phase": "Plaster & Waterproofing", "title": "PLASTER (INTERNAL & EXTERNAL)", "items": 6, "dur": 36, "pred": "15, 16"},
+    {"part": 2, "phase": "Finishing", "title": "FLOORING & WALL TILING", "items": 6, "dur": 70, "pred": "18, 17, 4"},
+    {"part": 2, "phase": "Finishing", "title": "DOORS & WINDOWS", "items": 5, "dur": 45, "pred": "19-45"},
+    {"part": 2, "phase": "Finishing", "title": "FALSE CEILING", "items": 5, "dur": 45, "pred": "18"},
+    {"part": 2, "phase": "Finishing", "title": "PAINT & POLISH", "items": 5, "dur": 70, "pred": "19, 21"},
+    {"part": 2, "phase": "Finishing", "title": "SANITARY & ELECTRICAL FIXTURES INSTALLATION", "items": 6, "dur": 30, "pred": "22-15, 20"},
+    {"part": 2, "phase": "Finishing", "title": "EXTERNAL WORKS & BOUNDARY WALL", "items": 5, "dur": 60, "pred": "18+30"},
+    {"part": 2, "phase": "Handover", "title": "FINAL SNAGGING & HANDOVER", "items": 7, "dur": 20, "pred": "22, 23, 24"}
+  ];
+  /* ======================================================================================================= */
+
+  var KEY = "nvhomes-project-timeline-v2";
+  var QC_KEY = "nvhomes-quality-checklists-v1";
+  var N = ACTS.length, MS = N; // index N = "Project Completion" milestone
+  var $ = function (id) { return document.getElementById(id); };
+  var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  /* ---------- dates as whole day numbers ---------- */
+  function toDay(iso) { if (!iso) return null; var p = iso.split("-"); if (p.length < 3) return null; var t = Date.UTC(+p[0], +p[1] - 1, +p[2]); return isNaN(t) ? null : Math.round(t / 864e5); }
+  function toIso(d) { var x = new Date(d * 864e5); return x.getUTCFullYear() + "-" + pad(x.getUTCMonth() + 1) + "-" + pad(x.getUTCDate()); }
+  function fmt(d) { if (d == null) return "–"; var x = new Date(d * 864e5); return pad(x.getUTCDate()) + "-" + MON[x.getUTCMonth()] + "-" + String(x.getUTCFullYear()).slice(2); }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function todayDay() { var n = new Date(); return Math.round(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()) / 864e5); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  /* ---------- state ---------- */
+  function fresh() {
+    var t = todayDay();
+    var s = { start: toIso(t), dd: toIso(t), zoom: "week", closed: {}, acts: {}, baseline: null };
+    ACTS.forEach(function (a, i) { s.acts[i] = { dur: a.dur, pred: a.pred, pct: 0, as: "", af: "", rem: "" }; });
+    return s;
+  }
+  var state = (function () {
+    try {
+      var s = JSON.parse(localStorage.getItem(KEY));
+      if (s && s.acts) { ACTS.forEach(function (a, i) { if (!s.acts[i]) s.acts[i] = { dur: a.dur, pred: a.pred, pct: 0, as: "", af: "", rem: "" }; }); s.closed = s.closed || {}; return s; }
+    } catch (e) {}
+    return fresh();
+  })();
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+  function parsePred(str, self) {
+    var out = [];
+    String(str || "").split(",").forEach(function (tok) {
+      var m = /^\s*(\d+)\s*([+-]\s*\d+)?\s*$/.exec(tok);
+      if (!m) return;
+      var id = parseInt(m[1], 10) - 1;
+      if (id < 0 || id >= N || id === self) return;
+      out.push({ id: id, lag: m[2] ? parseInt(m[2].replace(/\s/g, ""), 10) : 0 });
+    });
+    return out;
+  }
+  function anyProgress() { for (var i = 0; i < N; i++) if (state.acts[i].as || +state.acts[i].pct > 0) return true; return false; }
+
+  /* ---------- scheduling (forward + backward pass, like P6 retained logic) ---------- */
+  var S; // computed schedule
+  // pure = the clean plan from the project start (used for the baseline): no actuals, no data date
+  function compute(pure) {
+    var start = toDay(state.start) || todayDay(), dd = pure ? -1e9 : (toDay(state.dd) || todayDay());
+    var res = [], visiting = {};
+    function calc(i) {
+      if (res[i]) return res[i];
+      if (visiting[i]) return null; // loop guard for circular predecessors
+      visiting[i] = true;
+      var a = state.acts[i], dur = Math.max(1, parseInt(a.dur, 10) || 1), preds = parsePred(a.pred, i);
+      var es = start;
+      preds.forEach(function (p) { var r = calc(p.id); if (r) es = Math.max(es, r.f + 1 + p.lag); });
+      var as = pure ? null : toDay(a.as), af = pure ? null : toDay(a.af), pct = Math.min(100, Math.max(0, +a.pct || 0)), s, f, st;
+      if (as != null && af != null) { s = as; f = Math.max(as, af); pct = 100; st = "done"; }
+      else if (as != null) {
+        var rem = Math.ceil(dur * (100 - pct) / 100);          // remaining duration
+        s = as; f = rem > 0 ? Math.max(as, dd + rem - 1) : Math.max(as, dd); st = "prog";
+      } else { s = Math.max(es, dd); f = s + dur - 1; pct = 0; st = "not"; } // not started: can't start before the data date
+      res[i] = { s: s, f: f, dur: dur, pct: pct, st: st, preds: preds };
+      visiting[i] = false;
+      return res[i];
+    }
+    for (var i = 0; i < N; i++) calc(i);
+    var pf = start; for (i = 0; i < N; i++) pf = Math.max(pf, res[i].f);
+    // backward pass -> total float / critical path
+    var succ = {}; for (i = 0; i < N; i++) res[i].preds.forEach(function (p) { (succ[p.id] = succ[p.id] || []).push({ id: i, lag: p.lag }); });
+    var lf = [];
+    function late(i) {
+      if (lf[i] != null) return lf[i];
+      lf[i] = pf;
+      var v = pf;
+      (succ[i] || []).forEach(function (sx) { var r = res[sx.id]; v = Math.min(v, late(sx.id) - (r.f - r.s) - 1 - sx.lag); });
+      lf[i] = v; return v;
+    }
+    for (i = 0; i < N; i++) { res[i].tf = late(i) - res[i].f; res[i].crit = res[i].st !== "done" && res[i].tf <= 0; }
+    var allDone = res.slice(0, N).every(function (r) { return r.st === "done"; });
+    res[MS] = { s: pf, f: pf, dur: 0, pct: allDone ? 100 : 0, st: allDone ? "done" : "not", ms: true, crit: !allDone, tf: 0 };
+    return { res: res, start: start, dd: dd, pf: pf };
+  }
+  function schedule() {
+    S = compute(false);
+    // baseline follows the clean plan until work starts, then stays frozen until "Update baseline"
+    if (!state.baseline || state.baseline.length !== N + 1 || !anyProgress()) setBaseline(false, true);
+    return S;
+  }
+  function setBaseline(persist, pure) {
+    var src = pure ? compute(true) : S;
+    state.baseline = src.res.map(function (r) { return { s: r.s, f: r.f }; });
+    if (persist !== false) save();
+  }
+
+  /* ---------- QC link (reads the Quality Checklists page data, same browser) ---------- */
+  function qcStatus(i) {
+    try {
+      var q = JSON.parse(localStorage.getItem(QC_KEY)); if (!q || !q.acts || !q.acts[i]) return "q-not";
+      var v = q.acts[i].v || {}, n = 0, done = 0, na = 0, total = (ACTS[i].items || 0);
+      Object.keys(v).forEach(function (k) { if (v[k] === "Yes") done++; else if (v[k] === "N/A") na++; });
+      if (!done && !na) return "q-not"; return done + na >= total ? "q-done" : "q-prog";
+    } catch (e) { return "q-not"; }
+  }
+  var QC_TXT = { "q-done": "Checklist completed", "q-prog": "Checklist in progress", "q-not": "Checklist not started" };
+
+  /* ---------- rendering (two parts: 1 = Grey Structure, 2 = Finishing, 6-month windows) ---------- */
+  var PARTS = [
+    { n: 1, months: 6, ms: "Grey Structure Complete" },
+    { n: 2, months: 6, ms: "Project Completion" }
+  ];
+  var phases = [];
+  ACTS.forEach(function (a) { if (phases.indexOf(a.phase) < 0) phases.push(a.phase); });
+  function partIdx(n) { var o = []; ACTS.forEach(function (a, i) { if (a.part === n) o.push(i); }); return o; }
+
+  function rows(P) {
+    var list = [], idx = partIdx(P.n);
+    phases.forEach(function (ph) {
+      var pi = idx.filter(function (i) { return ACTS[i].phase === ph; });
+      if (!pi.length) return;
+      list.push({ type: "sum", phase: ph, idx: pi });
+      if (!state.closed[ph]) pi.forEach(function (i) { list.push({ type: "act", i: i }); });
+    });
+    list.push({ type: "ms" });
+    return list;
+  }
+  function sumInfo(idx) {
+    var s = Infinity, f = -Infinity, w = 0, d = 0, bs = Infinity, bf = -Infinity, done = true;
+    idx.forEach(function (i) { var r = S.res[i], b = state.baseline[i]; s = Math.min(s, r.s); f = Math.max(f, r.f); w += r.dur * r.pct; d += r.dur; bs = Math.min(bs, b.s); bf = Math.max(bf, b.f); if (r.st !== "done") done = false; });
+    return { s: s, f: f, pct: d ? w / d : 0, bs: bs, bf: bf, done: done };
+  }
+  function monthStart(day) { var x = new Date(day * 864e5); return Math.round(Date.UTC(x.getUTCFullYear(), x.getUTCMonth(), 1) / 864e5); }
+  function addMonths(day, k) { var x = new Date(day * 864e5); return Math.round(Date.UTC(x.getUTCFullYear(), x.getUTCMonth() + k, x.getUTCDate()) / 864e5); }
+
+  function renderPart(P) {
+    var res = S.res, list = rows(P), all = sumInfo(partIdx(P.n)), n = P.n;
+    // window: starts when the part starts and shows 6 months (longer only if the part runs late)
+    var lo = Math.min(all.bs, all.s);
+    var hi = addMonths(lo, P.months) - 1, months = P.months;
+    while (hi < Math.max(all.f, all.bf) + 2) { months++; hi = addMonths(lo, months) - 1; }
+    $("pt-lrows-" + n).innerHTML = "";
+    var W = Math.max(120, $("pt-right-" + n).clientWidth);
+    var ppd = W / (hi - lo + 1);
+    var zoom = ppd >= 16 ? "day" : ppd >= 3.2 ? "week" : "month";
+    function X(day) { return Math.round((day - lo) * ppd); }
+    function dcell(cls, plan, act) { return '<div class="dt ' + cls + '"><span class="pl">' + plan + '</span><span class="ac">' + act + '</span></div>'; }
+    function label(txt, s, f, cls) {
+      var w = txt.length * 5.6 + 8, xr = X(f + 1) + 6, xl = X(s) - 6;
+      if (xr + w <= W) return '<div class="pt-lbl ' + cls + '" style="left:' + xr + 'px">' + txt + '</div>';
+      if (xl - w >= 0) return '<div class="pt-lbl ' + cls + '" style="right:' + (W - xl) + 'px">' + txt + '</div>';
+      return "";
+    }
+
+    var L = "", R = "";
+    list.forEach(function (row) {
+      if (row.type === "sum") {
+        var si = sumInfo(row.idx);
+        L += '<div class="pt-row pt-cols sum' + (state.closed[row.phase] ? " closed" : "") + '" data-ph="' + esc(row.phase) + '">' +
+          '<div></div><div class="l nm" title="' + esc(row.phase) + '">' + esc(row.phase) + '</div><div>' + (si.f - si.s + 1) + '</div>' +
+          dcell("c-st", fmt(si.bs), fmt(si.s)) + dcell("c-fi", fmt(si.bf), fmt(si.f)) + '</div>';
+        R += '<div class="pt-row pt-grow sum"><div class="pt-lane"></div>' +
+          '<div class="pt-sumbl" style="left:' + X(si.bs) + 'px;width:' + Math.max(2, X(si.bf + 1) - X(si.bs)) + 'px" title="Planned ' + fmt(si.bs) + ' – ' + fmt(si.bf) + '"></div>' +
+          '<div class="pt-sumbar" style="left:' + X(si.s) + 'px;width:' + Math.max(2, X(si.f + 1) - X(si.s)) + 'px" title="Actual / forecast ' + fmt(si.s) + ' – ' + fmt(si.f) + '"></div></div>';
+      } else if (row.type === "act") {
+        var i = row.i, r = res[i], b = state.baseline[i], nmT = titleCase(ACTS[i].title);
+        L += '<div class="pt-row pt-cols act" data-i="' + i + '">' +
+          '<div>' + (i + 1) + '</div><div class="l nm" title="' + esc(nmT) + '">' + (r.crit ? '<span class="pt-crit-dot" title="Critical">●</span>' : "") + esc(nmT) + '</div>' +
+          '<div>' + r.dur + '</div>' +
+          dcell("c-st", fmt(b.s), fmt(r.s) + (r.st !== "not" ? " A" : "")) +
+          dcell("c-fi", fmt(b.f), fmt(r.f) + (r.st === "done" ? " A" : "")) + '</div>';
+        var cls = r.st === "done" ? "done" : r.crit ? "crit" : "";
+        R += '<div class="pt-row pt-grow act" data-i="' + i + '"><div class="pt-lane"></div>' +
+          '<div class="pt-bl" style="left:' + X(b.s) + 'px;width:' + Math.max(2, X(b.f + 1) - X(b.s)) + 'px" title="Planned: ' + fmt(b.s) + ' – ' + fmt(b.f) + '"></div>' +
+          '<div class="pt-bar ' + cls + '" style="left:' + X(r.s) + 'px;width:' + Math.max(3, X(r.f + 1) - X(r.s)) + 'px" title="' + esc(nmT) + ' (actual / forecast): ' + fmt(r.s) + ' – ' + fmt(r.f) + ', ' + Math.round(r.pct) + '% done"><i style="width:' + r.pct + '%"></i></div>' +
+          label(esc(nmT), r.s, r.f, "") + '</div>';
+      } else {
+        var mf = all.f, mbf = all.bf, mdone = all.done;
+        L += '<div class="pt-row pt-cols ms">' +
+          '<div></div><div class="l nm">◆ ' + P.ms + '</div><div>0</div>' +
+          dcell("c-st", "", "") + dcell("c-fi", fmt(mbf), fmt(mf) + (mdone ? " A" : "")) + '</div>';
+        R += '<div class="pt-row pt-grow ms"><div class="pt-lane"></div>' +
+          '<div class="pt-ms pl" style="left:' + X(mbf + 1) + 'px" title="Planned ' + fmt(mbf) + '"></div>' +
+          '<div class="pt-ms ' + (mdone ? "done" : "") + '" style="left:' + X(mf + 1) + 'px" title="Forecast ' + fmt(mf) + '"></div>' +
+          label("Plan " + fmt(mbf), mbf, mbf, "pl") + label("Forecast " + fmt(mf), mf, mf, "") + '</div>';
+      }
+    });
+    $("pt-lrows-" + n).innerHTML = L;
+
+    // ---- timescale + gridlines ----
+    var top = "", bot = "", grid = "", d;
+    if (zoom === "month") {
+      for (d = lo; d <= hi; ) {
+        var dt = new Date(d * 864e5), y = dt.getUTCFullYear(), mo = dt.getUTCMonth();
+        var next = Math.round(Date.UTC(y, mo + 1, 1) / 864e5);
+        bot += '<div class="pt-tick" style="left:' + X(d) + 'px;width:' + (X(next) - X(d)) + 'px">' + (X(next) - X(d) >= 22 ? MON[mo] : "") + '</div>';
+        grid += '<div class="pt-gridline major" style="left:' + X(d) + 'px"></div>';
+        if (mo === 0 || d === lo) { var ny = Math.round(Date.UTC(y + 1, 0, 1) / 864e5); top += '<div class="pt-tick" style="left:' + X(d) + 'px;width:' + (X(Math.min(ny, hi + 1)) - X(d)) + 'px">' + y + '</div>'; }
+        d = next;
+      }
+    } else {
+      for (d = lo; d <= hi; d++) {
+        var tt = new Date(d * 864e5);
+        if (tt.getUTCDate() === 1 || d === lo) {
+          var nm = Math.round(Date.UTC(tt.getUTCFullYear(), tt.getUTCMonth() + 1, 1) / 864e5);
+          var mw = X(Math.min(nm, hi + 1)) - X(d);
+          top += '<div class="pt-tick" style="left:' + X(d) + 'px;width:' + mw + 'px">' + (mw >= 58 ? MON[tt.getUTCMonth()] + " " + tt.getUTCFullYear() : mw >= 26 ? MON[tt.getUTCMonth()] : "") + '</div>';
+          if (d !== lo) grid += '<div class="pt-gridline major" style="left:' + X(d) + 'px"></div>';
+        }
+        var monday = tt.getUTCDay() === 1;
+        if (zoom === "day") {
+          bot += '<div class="pt-tick" style="left:' + X(d) + 'px;width:' + ppd + 'px;padding-left:0;text-align:center">' + tt.getUTCDate() + '</div>';
+          if (tt.getUTCDate() !== 1) grid += '<div class="pt-gridline" style="left:' + X(d) + 'px"></div>';
+        } else if (monday) {
+          bot += '<div class="pt-tick" style="left:' + X(d) + 'px;width:' + Math.round(7 * ppd) + 'px">' + (7 * ppd >= 22 ? pad(tt.getUTCDate()) : "") + '</div>';
+          if (tt.getUTCDate() !== 1) grid += '<div class="pt-gridline" style="left:' + X(d) + 'px"></div>';
+        }
+      }
+    }
+    $("pt-rhead-" + n).innerHTML = '<div class="pt-scale top">' + top + '</div><div class="pt-scale bot">' + bot + '</div>';
+    var ddLine = (S.dd >= lo && S.dd <= hi) ? '<div class="pt-dd" style="left:' + X(S.dd) + 'px"><span>Data date ' + fmt(S.dd) + '</span></div>' : "";
+    $("pt-rbody-" + n).innerHTML = grid + ddLine + R;
+
+    // ---- part summary pills ----
+    var v = all.f - all.bf;
+    $("pt-pstats-" + n).innerHTML =
+      '<div class="pt-pill">Timeline window<b>' + fmt(lo) + ' – ' + fmt(hi) + ' (' + months + ' months)</b></div>' +
+      '<div class="pt-pill">Planned<b>' + fmt(all.bs) + ' – ' + fmt(all.bf) + '</b></div>' +
+      '<div class="pt-pill">Forecast finish<b>' + fmt(all.f) + '</b></div>' +
+      '<div class="pt-pill">Variance<b class="' + (v > 0 ? "bad" : v < 0 ? "good" : "") + '">' + (v > 0 ? "+" : "") + v + ' days</b></div>' +
+      '<div class="pt-pill">Done<b>' + Math.round(all.pct) + '%</b></div>';
+  }
+
+  function render() {
+    schedule();
+    var res = S.res;
+    var active = state.part === 2 ? 2 : 1;
+    PARTS.forEach(function (P) {
+      var on = P.n === active, si = sumInfo(partIdx(P.n));
+      $("pt-part-" + P.n).hidden = !on;
+      var tab = $("pt-tab-" + P.n); tab.classList.toggle("on", on); tab.setAttribute("aria-selected", on ? "true" : "false");
+      $("pt-tab-d-" + P.n).textContent = fmt(si.bs) + " – " + fmt(si.bf) + (si.f > si.bf ? "  ·  +" + (si.f - si.bf) + " days late" : "");
+      $("pt-tab-p-" + P.n).textContent = Math.round(si.pct) + "%";
+      if (on) renderPart(P);
+    });
+
+    // ---- KPIs ----
+    var bf = state.baseline[MS].f, ff = S.pf, varD = ff - bf;
+    $("pt-k-bf").textContent = fmt(bf); $("pt-k-bdur").textContent = (bf - state.baseline.reduce(function (m, b) { return Math.min(m, b.s); }, Infinity) + 1) + " days";
+    $("pt-k-ff").textContent = fmt(ff); $("pt-k-fdur").textContent = (ff - S.start + 1) + " days total";
+    var kv = $("pt-k-var"); kv.textContent = (varD > 0 ? "+" : "") + varD + " days"; kv.className = varD > 0 ? "bad" : varD < 0 ? "good" : "";
+    $("pt-k-vars").textContent = varD > 0 ? "Behind baseline" : varD < 0 ? "Ahead of baseline" : "On schedule";
+    var tw = 0, aw = 0, pw = 0;
+    for (var k = 0; k < N; k++) {
+      var rr = res[k], bb = state.baseline[k]; tw += rr.dur; aw += rr.dur * rr.pct / 100;
+      pw += rr.dur * Math.min(1, Math.max(0, (S.dd - bb.s + 1) / (bb.f - bb.s + 1)));
+    }
+    var ap = tw ? aw / tw * 100 : 0, pp = tw ? pw / tw * 100 : 0;
+    $("pt-k-pct").innerHTML = Math.round(ap) + '% <span style="font-size:12px;color:#6B6B6B;font-weight:600">/ ' + Math.round(pp) + '% planned</span>';
+    $("pt-k-bar").style.width = ap + "%"; $("pt-k-plan").style.width = pp + "%";
+    $("pmAct").textContent = Math.round(ap) + "%"; $("pmPlan").textContent = Math.round(pp) + "%";
+    var gv = $("pmVar"); gv.textContent = (varD > 0 ? "+" : "") + varD + " d"; gv.className = varD > 0 ? "bad" : varD < 0 ? "good" : "";
+
+    $("pt-note").textContent = anyProgress()
+      ? "Baseline is frozen since work has started. Press “Update baseline” only if the plan is officially revised. Durations are in calendar days."
+      : "Planning mode: the baseline follows your plan until the first activity starts. Click an activity to change its duration, predecessors or progress. Durations are in calendar days.";
+
+    $("pt-expand").textContent = phases.every(function (p) { return state.closed[p]; }) ? "Expand all" : "Collapse all";
+    $("pt-start").value = state.start; $("pt-dd").value = state.dd;
+    renderCards();
+    if (openI != null) fillInfo(openI);
+  }
+  function titleCase(s) {
+    return s.toLowerCase().replace(/(^|[\s(\/&+-])([a-z])/g, function (m, a, b) { return a + b.toUpperCase(); })
+      .replace(/\b(Mep|Pcc|Dpc)\b/g, function (m) { return m.toUpperCase(); }).replace(/\b(And|Of|In|To|By|As)\b/g, function (m) { return m.toLowerCase(); });
+  }
+  function scrollToDD() {} // timeline always fits the width, nothing to scroll
+
+  /* ---------- edit panel ---------- */
+  var openI = null;
+  function openEdit(i) {
+    openI = i; var a = state.acts[i];
+    $("pt-m-title").textContent = (i + 1) + ". " + titleCase(ACTS[i].title);
+    $("pt-m-phase").textContent = ACTS[i].phase + " phase";
+    $("pt-m-dur").value = a.dur; $("pt-m-pred").value = a.pred; $("pt-m-pct").value = a.pct; $("pt-m-pctr").value = a.pct;
+    $("pt-m-as").value = a.as; $("pt-m-af").value = a.af; $("pt-m-rem").value = a.rem || "";
+    $("pt-m-qc").href = "quality-checklist.html#cl-" + pad(i + 1);
+    fillInfo(i);
+    $("pt-overlay").hidden = false; $("pt-m-dur").focus();
+  }
+  function closeEdit() { $("pt-overlay").hidden = true; openI = null; }
+  function fillInfo(i) {
+    var r = S.res[i], b = state.baseline[i], v = r.f - b.f, qc = qcStatus(i);
+    var st = r.st === "done" ? "Completed" : r.st === "prog" ? "In progress" : "Not started";
+    $("pt-m-info").innerHTML =
+      '<div><span>Baseline start – finish</span><b>' + fmt(b.s) + ' – ' + fmt(b.f) + '</b></div>' +
+      '<div><span>Forecast start – finish</span><b>' + fmt(r.s) + ' – ' + fmt(r.f) + '</b></div>' +
+      '<div><span>Status</span><b>' + st + '</b></div>' +
+      '<div><span>Finish variance</span><b style="color:' + (v > 0 ? "#C0392B" : v < 0 ? "#1e7b3c" : "inherit") + '">' + (v > 0 ? "+" : "") + v + ' days</b></div>' +
+      '<div><span>Total float</span><b style="color:' + (r.crit ? "#C0392B" : "inherit") + '">' + (r.st === "done" ? "–" : r.tf + " days" + (r.crit ? " (critical)" : "")) + '</b></div>' +
+      '<div><span>Quality checklist</span><b><span class="pt-qc ' + qc + '"></span> ' + QC_TXT[qc] + '</b></div>';
+  }
+  function upd(field, val) {
+    var a = state.acts[openI];
+    a[field] = val;
+    if (field === "pct") {
+      a.pct = Math.min(100, Math.max(0, parseInt(val, 10) || 0));
+      if (a.pct > 0 && !a.as) a.as = state.dd;
+      if (a.pct === 100 && !a.af) a.af = state.dd;
+      if (a.pct < 100) a.af = "";
+      $("pt-m-pct").value = a.pct; $("pt-m-pctr").value = a.pct; $("pt-m-as").value = a.as; $("pt-m-af").value = a.af;
+    }
+    if (field === "af" && val) { a.pct = 100; if (!a.as) a.as = val; $("pt-m-pct").value = 100; $("pt-m-pctr").value = 100; $("pt-m-as").value = a.as; }
+    if (field === "af" && !val && +a.pct === 100) { a.pct = 90; $("pt-m-pct").value = 90; $("pt-m-pctr").value = 90; }
+    if (field === "as" && !val) { a.af = ""; a.pct = 0; $("pt-m-af").value = ""; $("pt-m-pct").value = 0; $("pt-m-pctr").value = 0; }
+    if (field === "dur") a.dur = Math.max(1, parseInt(val, 10) || 1);
+    save(); render();
+  }
+  $("pt-m-dur").addEventListener("change", function () { upd("dur", this.value); });
+  $("pt-m-pred").addEventListener("change", function () { upd("pred", this.value); });
+  $("pt-m-pct").addEventListener("change", function () { upd("pct", this.value); });
+  $("pt-m-pctr").addEventListener("input", function () { upd("pct", this.value); });
+  $("pt-m-as").addEventListener("change", function () { upd("as", this.value); });
+  $("pt-m-af").addEventListener("change", function () { upd("af", this.value); });
+  $("pt-m-rem").addEventListener("input", function () { state.acts[openI].rem = this.value; save(); });
+  $("pt-m-startnow").addEventListener("click", function () { if (!state.acts[openI].as) { $("pt-m-as").value = state.dd; upd("as", state.dd); } });
+  $("pt-m-donenow").addEventListener("click", function () { $("pt-m-af").value = state.dd; upd("af", state.dd); });
+  $("pt-m-clear").addEventListener("click", function () { $("pt-m-as").value = ""; upd("as", ""); });
+  $("pt-m-close").addEventListener("click", closeEdit);
+  $("pt-m-done").addEventListener("click", closeEdit);
+  $("pt-overlay").addEventListener("click", function (e) { if (e.target === this) closeEdit(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && openI != null) closeEdit(); });
+
+  /* ---------- toolbar + grid events ---------- */
+  $("pt-app").addEventListener("click", function (e) {
+    var sr = e.target.closest(".pt-row.sum[data-ph]"); if (sr) { var ph = sr.dataset.ph; state.closed[ph] = !state.closed[ph]; save(); render(); return; }
+    var ar = e.target.closest(".pt-row.act[data-i]"); if (ar) openEdit(+ar.dataset.i);
+  });
+  // highlight matching row in both panes
+  $("pt-app").addEventListener("mouseover", function (e) {
+    var r = e.target.closest(".pt-row.act"); document.querySelectorAll(".pt-row.hl").forEach(function (x) { x.classList.remove("hl"); });
+    if (r) document.querySelectorAll('.pt-row.act[data-i="' + r.dataset.i + '"]').forEach(function (x) { x.classList.add("hl"); });
+  });
+  $("pt-start").addEventListener("change", function () { if (this.value) { state.start = this.value; save(); render(); scrollToDD(true); } });
+  $("pt-dd").addEventListener("change", function () { if (this.value) { state.dd = this.value; save(); render(); scrollToDD(true); } });
+  $("pt-expand").addEventListener("click", function () {
+    var allClosed = phases.every(function (p) { return state.closed[p]; });
+    phases.forEach(function (p) { state.closed[p] = !allClosed; }); save(); render();
+  });
+  $("pt-baseline").addEventListener("click", function () {
+    if (confirm("Replace the baseline with the current forecast dates? Use this only when the plan is officially revised.")) { setBaseline(true, false); render(); }
+  });
+  $("pt-reset").addEventListener("click", function () {
+    if (confirm("Reset all durations, predecessors, progress and the baseline to the defaults?")) { state = fresh(); save(); render(); scrollToDD(false); }
+  });
+
+
+  /* ---------- phone: activity cards timeline ---------- */
+  var pmFilter = "all", pmSort = "due";
+  var PH_ICON = {
+    "Pre-Construction": '<rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>',
+    "Substructure": '<path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5"/>',
+    "Superstructure": '<path d="M4 21V8l8-5 8 5v13M9 21v-6h6v6M8 11h.01M16 11h.01"/>',
+    "MEP Rough-In": '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+    "Plaster & Waterproofing": '<path d="M4 20c3 0 5-1 5-3l8-8-3-3-8 8c-2 0-2 3-2 6zM14 6l3 3"/>',
+    "Finishing": '<path d="M5 4h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H5zM18 6.5h2V12h-8v3"/><rect x="10" y="15" width="4" height="6" rx="1"/>',
+    "Handover": '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/>'
+  };
+  function shortD(d) { var x = new Date(d * 864e5); return x.getUTCDate() + " " + MON[x.getUTCMonth()] + " '" + String(x.getUTCFullYear()).slice(2); }
+  function actStat(i) {
+    var r = S.res[i], b = state.baseline[i];
+    if (r.st === "done") return "done";
+    if (r.f > b.f) return "late";
+    return r.st === "prog" ? "prog" : "not";
+  }
+
+  var pmMonth = null; // selected month start (day number) or null = all
+  function partWindow(P, all) {
+    var lo = Math.min(all.bs, all.s), months = P.months, hi = addMonths(lo, months) - 1;
+    while (hi < Math.max(all.f, all.bf) + 2) { months++; hi = addMonths(lo, months) - 1; }
+    return { lo: lo, hi: hi, months: months };
+  }
+  function monY(d) { var x = new Date(d * 864e5); return MON[x.getUTCMonth()] + " " + x.getUTCFullYear(); }
+  var STAT_TXT = { done: "Completed", prog: "In progress", late: "Delayed", not: "Not started" };
+  function renderCards() {
+    var tl = $("pmTl"); if (!tl) return;
+    var part = state.part === 2 ? 2 : 1, idx = partIdx(part), cnt = { all: idx.length, prog: 0, done: 0, late: 0, not: 0 }, pct = 0, w = 0;
+    idx.forEach(function (i) { cnt[actStat(i)]++; pct += S.res[i].dur * S.res[i].pct; w += S.res[i].dur; });
+    var CH = [["all", "All"], ["prog", "In Progress"], ["done", "Completed"], ["late", "Delayed"], ["not", "Not Started"]];
+    $("pmChips").innerHTML = CH.map(function (c) { return '<button type="button" class="pm-chip' + (pmFilter === c[0] ? " on" : "") + '" data-f="' + c[0] + '">' + c[1] + " (" + cnt[c[0]] + ")</button>"; }).join("");
+    var P = PARTS[part - 1], all = sumInfo(idx), win = partWindow(P, all), vr = all.f - all.bf, mt = [];
+    for (var m = monthStart(win.lo); m <= win.hi; m = addMonths(m, 1)) mt.push(m);
+    if (pmMonth != null && mt.indexOf(pmMonth) < 0) pmMonth = null;
+    var nowM = monthStart(S.dd);
+    $("pmMonths").innerHTML = mt.map(function (m0) {
+      var m1 = addMonths(m0, 1) - 1, n = idx.filter(function (i) { return S.res[i].s <= m1 && S.res[i].f >= m0; }).length, x = new Date(m0 * 864e5);
+      return '<button type="button" class="pm-mo' + (pmMonth === m0 ? " on" : "") + (m0 === nowM ? " now" : "") + '" data-m="' + m0 + '"><b>' + MON[x.getUTCMonth()] + '</b><small>' + n + ' act.</small></button>';
+    }).join("");
+    var pctAll = Math.round(all.pct), stTxt = all.done ? "Completed" : (pctAll > 0 || anyProgress() && idx.some(function (i) { return S.res[i].st !== "not"; })) ? "In progress · " + pctAll + "% done" : "Not started";
+    $("pmSum").innerHTML =
+      '<div class="eb">Part ' + part + ' / ' + (part === 2 ? "Finishing" : "Grey Structure") + '</div>' +
+      '<h3>' + (part === 2 ? "Finishing" : "Grey Structure") + ' Timeline</h3>' +
+      '<div class="rng"><b>' + monY(win.lo) + ' – ' + monY(win.hi) + '</b><span class="mchip">' + win.months + ' months</span></div>' +
+      '<div class="stt ' + (all.done ? "" : vr > 0 ? "late" : (stTxt === "Not started" ? "idle" : "")) + '"><i></i>' + stTxt + (vr > 0 && !all.done ? " · " + vr + " days late" : "") + '</div>' +
+      '<div class="bar"><i style="width:' + pctAll + '%"></i></div>' +
+      '<div class="bl"><span>Planned: ' + fmt(all.bs) + ' – ' + fmt(all.bf) + '</span><span>' + pctAll + '%</span></div>' +
+      '<div class="grid"><div><small>Activities</small><b>' + idx.length + '</b></div><div><small>Done</small><b>' + cnt.done + '</b></div><div><small>Late</small><b>' + cnt.late + '</b></div><div><small>Finish</small><b>' + fmt(all.f).slice(0, 6) + '</b></div></div>';
+    var list = idx.filter(function (i) {
+      if (pmFilter !== "all" && actStat(i) !== pmFilter) return false;
+      if (pmMonth != null) { var m1 = addMonths(pmMonth, 1) - 1; if (S.res[i].s > m1 || S.res[i].f < pmMonth) return false; }
+      return true;
+    });
+    list.sort(function (a, b) {
+      var ra = S.res[a], rb = S.res[b];
+      if (pmSort === "due") return ra.f - rb.f || a - b;
+      if (pmSort === "start") return ra.s - rb.s || a - b;
+      if (pmSort === "prog") return rb.pct - ra.pct || a - b;
+      return a - b;
+    });
+    if (!list.length) { tl.innerHTML = '<div class="pm-empty">Is filter mein koi activity nahi.</div>'; }
+    else tl.innerHTML = list.map(function (i) {
+      var r = S.res[i], st = actStat(i), a = ACTS[i], q = qcStatus(i);
+      return '<div class="pm-it s-' + st + '"><span class="pm-dot"></span><div class="pm-card" data-i="' + i + '">' +
+        '<div class="pm-top"><span class="pm-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (PH_ICON[a.phase] || PH_ICON["Finishing"]) + '</svg></span>' +
+        '<span class="pm-tx"><b>' + (r.crit ? '<span class="pt-crit-dot">●</span>' : "") + esc(titleCase(a.title)) + '</b><small>Activity ' + (i + 1) + ' · ' + esc(a.phase) + '</small></span>' +
+        '<span class="pm-pill2">' + STAT_TXT[st] + '</span></div>' +
+        '<div class="pm-mid"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>' + shortD(r.s) + ' – ' + shortD(r.f) + '</span>' +
+        '<em><i class="' + q + '"></i>' + r.dur + ' days</em></div>' +
+        '<div class="pm-prog"><div class="pm-bar"><i style="width:' + r.pct + '%"></i><u style="left:' + r.pct + '%"></u></div><b>' + Math.round(r.pct) + '%</b></div>' +
+        '</div></div>';
+    }).join("");
+    $("pmVTitle").textContent = document.body.classList.contains("pm-ov") ? "Dates & Summary" : (part === 2 ? "Finishing" : "Grey Structure") + " · " + Math.round(w ? pct / w : 0) + "%";
+  }
+  $("pmChips").addEventListener("click", function (e) { var c = e.target.closest(".pm-chip"); if (c) { pmFilter = c.dataset.f; renderCards(); } });
+  $("pmMonths").addEventListener("click", function (e) { var b = e.target.closest(".pm-mo"); if (b) { var m = +b.dataset.m; pmMonth = pmMonth === m ? null : m; renderCards(); } });
+  $("pmSort").addEventListener("change", function () { pmSort = this.value; renderCards(); });
+  $("pmTl").addEventListener("click", function (e) { var c = e.target.closest(".pm-card"); if (c) openEdit(+c.dataset.i); });
+
+  // part buttons: Grey Structure / Finishing (also reachable as #grey and #finishing links)
+  function selectPart(n, scroll) {
+    if (state.part !== n) pmMonth = null;
+    state.part = n; save(); render();
+    try { history.replaceState(null, "", n === 2 ? "#finishing" : "#grey"); } catch (e) {}
+    if (scroll) { var el = $("pt-part-" + n); window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 16, behavior: "smooth" }); }
+  }
+  document.querySelectorAll(".pt-tab").forEach(function (b) { b.addEventListener("click", function () { selectPart(+b.dataset.part, true); }); });
+  if (location.hash === "#finishing") state.part = 2; else if (location.hash === "#grey") state.part = 1;
+  var rz; window.addEventListener("resize", function () { clearTimeout(rz); rz = setTimeout(render, 120); });
+  render();
+
+  /* ---- phone: home screen + views (home / part 1 / part 2 / dates & summary) ---- */
+  (function () {
+    var body = document.body;
+    function view(v) {
+      body.classList.remove('pm-home', 'pm-p1', 'pm-p2', 'pm-ov');
+      body.classList.add(v === 'home' || v === 'ov' ? 'pm-' + v : 'pm-p' + v);
+      window.scrollTo(0, 0);
+      if (v === '1' || v === '2') selectPart(+v, false); else render();
+    }
+    document.querySelectorAll('.pm-dock button').forEach(function (b) { b.addEventListener('click', function () { view(b.getAttribute('data-v')); }); });
+    $('pmBack').addEventListener('click', function () { view('home'); });
+    $('pmVBack').addEventListener('click', function () { view('home'); });
+    $('pmVSum').addEventListener('click', function () { view('ov'); });
+    $('pmGanttBtn').addEventListener('click', function () { body.classList.toggle('pm-gantt'); render(); });
+    document.querySelectorAll('.pm-fdock button').forEach(function (b) { b.addEventListener('click', function () { view(b.getAttribute('data-v')); }); });
+    $('pmSearch').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var t = $('pmInput').value.toLowerCase().trim(), hit = -1;
+      if (!t) return;
+      if (/^\d+$/.test(t) && +t >= 1 && +t <= N) hit = +t - 1;
+      else for (var i = 0; i < N; i++) if (ACTS[i].title.toLowerCase().indexOf(t) > -1 || ACTS[i].phase.toLowerCase().indexOf(t) > -1) { hit = i; break; }
+      if (hit < 0) { $('pmMsg').textContent = 'Koi activity nahi mili — naam ya number likhein (1–' + N + ')'; return; }
+      $('pmMsg').textContent = ''; $('pmInput').value = '';
+      view(String(ACTS[hit].part)); openEdit(hit);
+    });
+    $('pmInput').addEventListener('input', function () { $('pmMsg').textContent = ''; });
+    // outside tap closes the sidebar
+    document.addEventListener('click', function (e) {
+      if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) { sidebar.classList.remove('open'); menuBtn.classList.remove('open'); }
+    });
+    var svg = document.querySelector('.bg-city');
+    function fit() { if (svg) svg.setAttribute('viewBox', window.innerWidth <= 760 ? '30 0 560 230' : '0 0 1600 230'); }
+    fit(); window.addEventListener('resize', fit);
+    if (location.hash === '#finishing') view('2'); else if (location.hash === '#grey') view('1');
+  })();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
+})();
+</script>
+
+</body>
+</html>

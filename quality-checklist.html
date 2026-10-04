@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quality Checklists - NEXTRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #F7ECDF;
+    color: #1A1A1A;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ============ Hamburger + Sidebar (matches homepage) ============ */
+.menu-btn {
+    position: fixed; top: 18px; left: 20px; z-index: 300;
+    background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; gap: 5px; padding: 8px;
+}
+.menu-btn span {
+    display: block; width: 22px; height: 2px;
+    background-color: #0D5C4D; border-radius: 2px; transition: all .3s ease;
+}
+.menu-btn.open span { background-color: #ffffff; }
+
+.sidebar {
+    width: 70px; background-color: #0D5C4D; height: 100vh;
+    position: fixed; left: -70px; top: 0;
+    display: flex; flex-direction: column; justify-content: space-between;
+    align-items: center; padding: 20px 0; z-index: 250; transition: left .3s ease;
+}
+.sidebar.open { left: 0; }
+.sidebar-logo { width:40px;height:40px;margin-top:48px;margin-bottom:18px;display:flex;align-items:center;justify-content:center;cursor:pointer; }
+.sidebar-logo-text { width:34px;height:34px;background:#fff;color:#0D5C4D;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px; }
+.sidebar-nav { display:flex;flex-direction:column;gap:6px;align-items:center; }
+.nav-item {
+    width:44px;height:44px;border-radius:10px;border:none;background:transparent;
+    color:rgba(255,255,255,.85);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:.2s;position:relative;
+}
+.nav-item:hover { background-color: rgba(255,255,255,.15); color:#fff; }
+.nav-item.active { background-color: rgba(255,255,255,.22); color:#fff; }
+.nav-item::after {
+    content: attr(data-tooltip); position:absolute; left:56px; top:50%; transform:translateY(-50%);
+    background:#1A1A1A; color:#fff; padding:6px 12px; border-radius:6px; font-size:13px;
+    white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .2s; z-index:300;
+}
+.nav-item:hover::after { opacity:1; }
+.sidebar-bottom { margin-bottom:10px; }
+.user-avatar { width:36px;height:36px;border-radius:50%;background:#2ECC71;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px; }
+
+/* ============ Top bar ============ */
+.top-bar {
+    margin: 0 auto;
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 22px 56px;
+}
+.brand-mini { display:flex; align-items:center; gap:10px; cursor:pointer; margin-left: 44px; }
+.brand-mini .dot { width:30px;height:30px;border-radius:8px;background:#0D5C4D;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px; }
+.brand-mini span { font-weight:700; color:#0D5C4D; font-size:15px; }
+.auth-buttons { display:flex; align-items:center; gap:20px; }
+.sign-in { color:#0D5C4D; text-decoration:none; font-weight:600; font-size:15px; }
+.sign-up { background:#0D5C4D; color:#fff; text-decoration:none; font-weight:600; font-size:14px; padding:10px 22px; border-radius:8px; }
+
+/* ============ Page heading ============ */
+.page-head { max-width:1240px; margin:0 auto; padding: 26px 56px 22px; }
+.page-head .eyebrow { color:#0D5C4D; font-size:12px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; margin-bottom:8px; }
+.page-head h1 { font-size:38px; font-weight:700; line-height:1.15; letter-spacing:-0.5px; margin-bottom:12px; }
+.page-head p { font-size:15px; color:#4a4a4a; line-height:1.7; max-width:760px; }
+.page-head p b { color:#0D5C4D; }
+.checklist-wrap { max-width:1240px; margin:0 auto; padding: 0 56px 60px; }
+.footer { text-align:center; padding:24px; font-size:12.5px; color:#8a8a8a; }
+
+@media (max-width: 760px) {
+
+}
+
+
+.bm-text { display:flex; flex-direction:column; line-height:1.1; }
+.bm-text b { font-weight:700; }
+.bm-text em { font-style:normal; }
+.bm-text small { display:none; }
+.acct-btn, .logout-nav { display:none; }
+html { -webkit-text-size-adjust:100%; }
+.sidebar { height:100vh; height:100dvh; overflow-y:auto; }
+@media (hover: none) { .nav-item::after { display:none; } }
+
+/* ============ Quality Checklist app (all rules scoped under .rcc) ============ */
+/* All styles are scoped under .rcc so they won't clash with your website's CSS */
+.rcc{--navy:#0D5C4D;--navy-2:#0A4D3C;--line:#E0D8CE;--soft:#E8F5F1;--input:#FDFBF8;--text:#1A1A1A;--muted:#6B6B6B;
+  --ok:#1e7b3c;--ok-bg:#dcf3e3;--warn:#8a5a00;--warn-bg:#fff1c7;--bad:#a1192b;--bad-bg:#fde0e3;--na-bg:#ececec;
+  font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px;line-height:1.4;max-width:1240px;margin:0 auto;padding:0;box-sizing:border-box}
+.rcc *,.rcc *::before,.rcc *::after{box-sizing:border-box}
+.rcc h2,.rcc h3,.rcc p{margin:0}
+.rcc .rcc-title{background:var(--navy);color:#fff;text-align:center;font-size:17px;font-weight:700;padding:15px 12px;border-radius:14px 14px 0 0;letter-spacing:.3px}
+.rcc .rcc-info{display:grid;grid-template-columns:repeat(2,1fr);border:1px solid var(--line);border-top:0;background:#fff;border-radius:0 0 14px 14px;overflow:hidden}
+.rcc .rcc-info label{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);font-weight:700;font-size:12.5px}
+.rcc .rcc-info label:nth-child(odd){border-right:1px solid var(--line)}
+.rcc .rcc-info label span{min-width:140px;flex-shrink:0}
+.rcc input,.rcc select{font:inherit;font-size:13px;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--input);width:100%;min-width:0}
+.rcc input:focus,.rcc select:focus{outline:2px solid var(--navy-2);outline-offset:-1px}
+.rcc .rcc-help{font-size:12px;color:var(--muted);font-style:italic;margin:12px 0}
+.rcc .rcc-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.rcc .rcc-card{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff}
+.rcc .rcc-card b{display:block;font-size:24px;color:var(--navy);font-variant-numeric:tabular-nums}
+.rcc .rcc-card small{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.4px}
+.rcc .rcc-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.rcc .rcc-toolbar select{width:auto;background:#fff}
+.rcc .rcc-spacer{flex:1}
+.rcc .rcc-btn{font:inherit;font-size:13px;font-weight:700;border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:8px;padding:8px 16px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.rcc .rcc-btn:hover{background:var(--navy-2)}
+.rcc .rcc-btn.ghost{background:#fff;color:var(--navy)}
+.rcc .rcc-btn.ghost:hover{background:var(--soft)}
+.rcc .rcc-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:#fff;-webkit-overflow-scrolling:touch}
+.rcc table{border-collapse:collapse;width:100%}
+.rcc th,.rcc td{border:1px solid var(--line);padding:7px 8px;vertical-align:middle}
+.rcc .rcc-sum{min-width:1000px}
+.rcc .rcc-sum thead th{background:var(--navy);color:#fff;font-size:11.5px;text-transform:uppercase;letter-spacing:.3px;text-align:center;position:sticky;top:0}
+.rcc .rcc-sum td{text-align:center;font-variant-numeric:tabular-nums;font-size:13px}
+.rcc .rcc-sum td.l{text-align:left}
+.rcc .rcc-sum tbody tr:nth-child(even){background:#FBF8F3}
+.rcc .rcc-sum tbody tr:hover{background:var(--soft)}
+.rcc .rcc-sum tfoot td{background:#E8F5F1;font-weight:700;color:var(--navy)}
+.rcc .rcc-link{color:var(--navy);font-weight:600;text-decoration:underline;text-decoration-color:rgba(13,92,77,.35);text-underline-offset:3px;cursor:pointer;background:none;border:0;padding:0;font:inherit;font-size:13px;text-align:left}
+.rcc .rcc-link:hover{color:var(--navy-2);text-decoration-color:currentColor}
+.rcc .rcc-bar{position:relative;height:18px;background:#EFEAE1;border-radius:3px;overflow:hidden;min-width:70px}
+.rcc .rcc-bar i{position:absolute;inset:0 auto 0 0;background:#3ddc97}
+.rcc .rcc-bar em{position:relative;font-style:normal;font-size:11.5px;font-weight:700;line-height:18px}
+.rcc .rcc-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap}
+.rcc .st-done{background:var(--ok-bg);color:var(--ok)}
+.rcc .st-prog{background:var(--warn-bg);color:var(--warn)}
+.rcc .st-not{background:var(--bad-bg);color:var(--bad)}
+.rcc .rcc-phase{font-size:12px}
+/* ----- checklist view ----- */
+.rcc .rcc-sheet{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 34px rgba(13,92,77,.08);padding:28px 32px;max-width:820px;margin:0 auto}
+.rcc .rcc-no{font-weight:700;font-size:15px}
+.rcc .rcc-by{font-size:13px;margin-bottom:22px}
+.rcc .rcc-h{text-align:center;font-weight:700;font-size:15px;text-decoration:underline;margin-bottom:14px}
+.rcc .rcc-cl th,.rcc .rcc-cl td{border-color:#000}
+.rcc .rcc-cl .hd{text-align:center;font-weight:700;padding:12px}
+.rcc .rcc-cl .site{display:flex;justify-content:space-between;gap:12px;font-weight:700;padding:12px}
+.rcc .rcc-cl thead th{background:#E8F5F1;font-size:12.5px}
+.rcc .rcc-cl td{padding:10px 8px;font-size:13px}
+.rcc .rcc-cl td.c{text-align:center}
+.rcc .rcc-cl select.v-Yes{background:var(--ok-bg);color:var(--ok);font-weight:700}
+.rcc .rcc-cl select.v-No{background:var(--bad-bg);color:var(--bad);font-weight:700}
+.rcc .rcc-cl select.v-NA{background:var(--na-bg)}
+.rcc .rcc-cl{table-layout:fixed}
+.rcc .rcc-cl .w-sr{width:52px}.rcc .rcc-cl .w-st{width:120px}.rcc .rcc-cl .w-rm{width:30%}
+.rcc .rcc-cl td{overflow-wrap:anywhere}
+.rcc .rcc-hl{background:#ffff00;font-weight:700;padding:0 3px}
+.rcc .rcc-date{display:flex;align-items:center;gap:10px;margin:18px 0 26px;font-weight:700;font-size:13px}
+.rcc .rcc-date input{max-width:200px}
+.rcc .rcc-signs{display:grid;grid-template-columns:1fr 1fr;gap:24px 40px}
+.rcc .rcc-sign b{display:block;font-size:13px}
+.rcc .rcc-sign small{display:block;font-size:12px;margin-bottom:10px}
+.rcc .rcc-sign input{background:#fff;border:0;border-bottom:1px solid #000;border-radius:0;padding:4px 0}
+.rcc .rcc-sign.r{text-align:right}
+.rcc .rcc-sign.c{grid-column:1/-1;text-align:center;max-width:280px;margin:10px auto 0}
+.rcc .rcc-nav{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.rcc .rcc-stat{margin-left:auto;display:flex;gap:10px;align-items:center;font-size:12.5px;color:var(--muted)}
+.rcc [hidden]{display:none!important}
+@media (max-width:720px){
+  .rcc{padding:0}
+  .rcc .rcc-info{grid-template-columns:1fr}
+  .rcc .rcc-info label:nth-child(odd){border-right:0}
+  .rcc .rcc-info label span{min-width:110px}
+  .rcc .rcc-cards{grid-template-columns:repeat(2,1fr)}
+  .rcc .rcc-sheet{padding:18px 14px}
+  .rcc .rcc-signs{grid-template-columns:1fr}
+  .rcc .rcc-sign.r{text-align:left}
+  .rcc .rcc-cl .site{flex-direction:column}
+  .rcc .rcc-stat{margin-left:0;width:100%}
+  .rcc .rcc-cl .w-sr{width:34px}.rcc .rcc-cl .w-st{width:78px}.rcc .rcc-cl .w-rm{width:22%}
+  .rcc .rcc-cl td,.rcc .rcc-cl th{padding:8px 5px;font-size:12px}
+  .rcc .rcc-cl select,.rcc .rcc-cl input{padding:5px 3px;font-size:12px}
+}
+
+/* ============ PHONE (screen only, so printing is unchanged) ============ */
+@media screen and (max-width: 760px) {
+    /* header like the reference: white bar, hamburger, logo + tagline, green square button */
+    .top-bar { position:sticky; top:0; z-index:200; background:#fff; padding:0 16px; height:64px; box-shadow:0 1px 8px rgba(0,0,0,.08); }
+    .menu-btn, .menu-btn.open { top:12px; left:8px; padding:11px 10px; background:transparent; border-radius:10px; }
+    .menu-btn span { background-color:#2b2b2b; }
+    .menu-btn.open span { background-color:#fff; }
+    .brand-mini { margin-left:44px; gap:10px; }
+    .brand-mini .dot { width:36px; height:36px; border-radius:50%; font-size:15px; font-style:italic; }
+    .bm-text b { font-size:20px; letter-spacing:-.2px; color:#15233A; }
+    .bm-text em { color:#0D5C4D; }
+    .bm-text small { display:block; font-size:8.5px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:#E8652B; margin-top:3px; white-space:nowrap; }
+    .top-bar .auth-buttons { display:none; }
+    .acct-btn { display:flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:10px; background:#0D7A33; color:#fff; flex:none; text-decoration:none; }
+    .logout-nav { display:flex; margin-bottom:12px; }
+
+    .page-head { padding:20px 16px 14px; }
+    .page-head .eyebrow { font-size:11.5px; margin-bottom:6px; }
+    .page-head h1 { font-size:25px; line-height:1.2; margin-bottom:10px; }
+    .page-head p { font-size:14px; line-height:1.65; }
+    .checklist-wrap { padding:0 12px 40px; }
+}
+
+@media screen and (max-width: 720px) {
+  .rcc input, .rcc select { font-size:16px; padding:10px 10px; }
+  .rcc .rcc-title { font-size:14.5px; padding:14px 10px; line-height:1.3; }
+  /* site info: label above field */
+  .rcc .rcc-info label { flex-direction:column; align-items:stretch; gap:5px; padding:10px 12px; font-size:12px; }
+  .rcc .rcc-info label span { min-width:0; }
+  .rcc .rcc-cards { gap:8px; }
+  .rcc .rcc-card { padding:12px; }
+  .rcc .rcc-card b { font-size:22px; }
+  .rcc .rcc-help { font-size:12px; }
+  .rcc .rcc-toolbar { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .rcc .rcc-toolbar select { width:100%; grid-column:1 / -1; }
+  .rcc .rcc-spacer { display:none; }
+  .rcc .rcc-btn { padding:12px 10px; font-size:13.5px; }
+
+  /* summary table -> one card per activity */
+  .rcc .rcc-scroll { overflow:visible; border:0; background:transparent; border-radius:0; }
+  .rcc .rcc-sum, .rcc .rcc-sum tbody, .rcc .rcc-sum tfoot { display:block; min-width:0; width:100%; }
+  .rcc .rcc-sum thead { display:none; }
+  .rcc .rcc-sum tr { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px 6px; background:#fff !important; border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:10px; }
+  .rcc .rcc-sum td { display:block; border:0; padding:0; text-align:left; min-width:0; font-size:13px; }
+  .rcc .rcc-sum td[data-l]:not(.l)::before { content:attr(data-l); display:block; font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.3px; margin-bottom:3px; }
+  .rcc .rcc-sum tbody td:nth-child(1) { display:none; }
+  .rcc .rcc-sum tbody td:nth-child(2) { grid-column:1 / 2; font-size:12px; color:var(--muted); font-weight:700; }
+  .rcc .rcc-sum tbody td:nth-child(2)::before { display:none !important; }
+  .rcc .rcc-sum tbody td:nth-child(3) { grid-column:2 / -1; text-align:right; font-size:11.5px; color:var(--muted); }
+  .rcc .rcc-sum tbody td:nth-child(4) { grid-column:1 / -1; font-size:15px; line-height:1.3; padding:2px 0 6px; }
+  .rcc .rcc-sum tbody td:nth-child(4) .rcc-link { font-size:15px; font-weight:700; }
+  .rcc .rcc-sum tbody td:nth-child(n+5):nth-child(-n+8) { text-align:center; background:#FBF8F3; border-radius:10px; padding:7px 2px; }
+  .rcc .rcc-sum tbody td:nth-child(9) { grid-column:1 / -1; }
+  .rcc .rcc-sum tbody td:nth-child(9) .rcc-bar { height:20px; }
+  .rcc .rcc-sum tbody td:nth-child(10) { grid-column:1 / 3; align-self:center; }
+  .rcc .rcc-sum tbody td:nth-child(11) { grid-column:3 / -1; }
+  .rcc .rcc-sum tbody td:nth-child(12) { grid-column:1 / -1; }
+  .rcc .rcc-sum tbody td:only-child { grid-column:1 / -1; }
+  .rcc .rcc-sum tfoot tr { background:#E8F5F1 !important; border-color:#cfe6de; }
+  .rcc .rcc-sum tfoot td { background:none; }
+  .rcc .rcc-sum tfoot td:nth-child(1) { grid-column:1 / -1; font-size:13px; letter-spacing:.5px; }
+  .rcc .rcc-sum tfoot td:nth-child(n+2):nth-child(-n+5) { text-align:center; }
+  .rcc .rcc-sum tfoot td:nth-child(6) { grid-column:1 / -1; }
+  .rcc .rcc-sum tfoot td:nth-child(7) { grid-column:1 / 3; }
+  .rcc .rcc-sum tfoot td:nth-child(8) { grid-column:3 / -1; }
+  .rcc .rcc-sum tfoot td:nth-child(9) { display:none; }
+
+  /* checklist sheet */
+  .rcc .rcc-nav { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .rcc #rcc-back, .rcc .rcc-nav .rcc-btn:not(#rcc-prev):not(#rcc-next) { grid-column:1 / -1; }
+  .rcc .rcc-stat { grid-column:1 / -1; flex-wrap:wrap; justify-content:space-between; }
+  .rcc .rcc-sheet { padding:16px 12px; border-radius:16px; }
+  .rcc .rcc-h { font-size:14px; line-height:1.35; }
+  .rcc .rcc-cl, .rcc .rcc-cl thead, .rcc .rcc-cl tbody { display:block; width:100%; }
+  .rcc .rcc-cl thead tr:last-child { display:none; }
+  .rcc .rcc-cl thead tr { display:block; border:1px solid #cfc8bb; border-bottom:0; }
+  .rcc .rcc-cl thead tr:first-child { border-radius:12px 12px 0 0; background:#E8F5F1; }
+  .rcc .rcc-cl thead td, .rcc .rcc-cl thead th { display:block; border:0; }
+  .rcc .rcc-cl .hd { font-size:12.5px; padding:10px; line-height:1.4; }
+  .rcc .rcc-cl thead tr:nth-child(2) { border-bottom:1px solid #cfc8bb; border-radius:0; }
+  .rcc .rcc-cl .site { padding:8px 10px; font-size:12.5px; gap:4px; }
+  .rcc .rcc-cl tbody tr { display:grid; grid-template-columns:30px 112px minmax(0,1fr); gap:8px 8px; align-items:center; border:1px solid #cfc8bb; border-top:0; padding:10px; }
+  .rcc .rcc-cl tbody tr:last-child { border-radius:0 0 12px 12px; }
+  .rcc .rcc-cl tbody td { display:block; border:0; padding:0; font-size:13px; line-height:1.4; }
+  .rcc .rcc-cl tbody td:nth-child(1) { grid-column:1; font-weight:700; color:var(--muted); align-self:start; padding-top:1px; }
+  .rcc .rcc-cl tbody td:nth-child(2) { grid-column:2 / -1; font-weight:600; }
+  .rcc .rcc-cl tbody td:nth-child(3) { grid-column:2; }
+  .rcc .rcc-cl tbody td:nth-child(4) { grid-column:3; }
+  .rcc .rcc-cl select, .rcc .rcc-cl input { padding:9px 8px; font-size:16px; }
+  .rcc .rcc-date { flex-wrap:wrap; }
+  .rcc .rcc-date input { max-width:none; flex:1; min-width:150px; }
+}
+
+
+
+
+.qm-infotoggle{display:none}
+@media screen and (max-width:720px){
+  .qm-infotoggle{display:flex;align-items:center;gap:10px;width:100%;background:#fff;border:1px solid var(--line,#E0D8CE);border-top:0;border-radius:0 0 14px 14px;padding:12px 14px;font-family:inherit;font-size:13px;color:#1A1A1A;cursor:pointer;text-align:left}
+  .qm-infotoggle b{font-size:14px;color:#0D5C4D;white-space:nowrap}
+  .qm-infotoggle span{flex:1;min-width:0;color:#6B6B6B;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .qm-infotoggle i{font-style:normal;font-size:22px;line-height:1;color:#0D5C4D;transition:transform .2s}
+  .qm-infotoggle[aria-expanded="true"] i{transform:rotate(45deg)}
+  .qm-infotoggle[aria-expanded="true"]{border-radius:0}
+  .rcc .rcc-info{display:none}
+  .rcc .rcc-info.open{display:grid;grid-template-columns:1fr 1fr;border-top:0;border-radius:0 0 14px 14px}
+  .rcc .rcc-info.open label{padding:8px 10px;gap:3px;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;color:#6B6B6B}
+  .rcc .rcc-info.open label:nth-child(odd){border-right:1px solid var(--line)}
+  .rcc .rcc-info.open input{padding:8px 8px}
+  .rcc .rcc-title{margin-bottom:0}
+  .rcc .rcc-cards{margin:12px 0}
+}
+
+/* ---- daily log + filter label ---- */
+.rcc .rcc-logform{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#fff;border:1px solid var(--line);border-top:0;padding:14px;border-radius:0 0 14px 14px}
+.rcc .rcc-logform label{display:block;font-weight:700;font-size:12px}
+.rcc .rcc-logform label span{display:block;margin-bottom:5px}
+.rcc .lf-full{grid-column:1/-1}
+.rcc .lf-err{grid-column:1/-1;color:var(--bad);font-size:12.5px;min-height:1px}
+.rcc .rcc-logmeta{display:flex;justify-content:space-between;align-items:center;margin:16px 0 10px}
+.rcc .rcc-logitem{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.rcc .rcc-logitem .top{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:4px}
+.rcc .rcc-logitem b{display:block;font-size:14px;color:var(--navy);margin-bottom:3px}
+.rcc .rcc-logitem p{font-size:13.5px;line-height:1.5}
+.rcc .rcc-logitem .rem{color:var(--muted);font-size:12.5px;margin-top:3px}
+.rcc .rcc-logitem button{border:0;background:none;color:var(--bad);font-weight:700;font-size:12px;cursor:pointer;padding:6px 0 0;font-family:inherit}
+.rcc .rcc-logempty{padding:16px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);background:#fff;text-align:center;font-size:13px}
+.rcc .rcc-logdate{font-weight:700;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin:14px 2px 8px}
+.qm-label{display:none}
+@media screen and (max-width:720px){
+  .qm-label:not([hidden]){display:inline-flex;align-items:center;gap:8px;background:#E8F5F1;color:#0D5C4D;font-weight:700;font-size:13px;padding:7px 14px;border-radius:20px;margin:2px 0 8px}
+  .rcc .rcc-logform{grid-template-columns:1fr}
+  .rcc .rcc-logform label, .rcc .rcc-logform .lf-full{grid-column:1/-1}
+}
+
+/* ============ PHONE HOME SCREEN (clean: title, search bar, 4 buttons) ============ */
+.qm-home, .qm-bg, .qm-homebtn { display:none; }
+.bg-deco{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;}
+.bg-deco::before{content:""; position:absolute; inset:0; background-image:radial-gradient(rgba(13,92,77,.13) 1px, transparent 1.4px); background-size:26px 26px;
+  -webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 45%, transparent 35%, #000 85%); mask-image:radial-gradient(ellipse 70% 60% at 50% 45%, transparent 35%, #000 85%);}
+.bg-blob{position:absolute; border-radius:50%; filter:blur(50px); opacity:.55;}
+.bg-blob.b1{width:460px;height:460px;background:#CFE7DE;top:-140px;left:-120px;}
+.bg-blob.b2{width:520px;height:520px;background:#F1D9B5;bottom:-200px;right:-160px;opacity:.6;}
+.bg-blob.b3{width:300px;height:300px;background:#D9EDE6;top:38%;right:6%;opacity:.45;}
+.bg-city{position:absolute; left:0; right:0; bottom:calc(178px + env(safe-area-inset-bottom)); width:100%; height:150px;}
+@media screen and (max-width: 720px) {
+  body.q-home { overflow:hidden; height:100vh; height:100dvh; }
+  body.q-home .qm-bg { display:block; }
+  body.q-home .top-bar { background:transparent; box-shadow:none; }
+  body.q-home .page-head, body.q-home .checklist-wrap, body.q-home .footer, body.q-home .qm-homebtn { display:none; }
+  body.q-home .qm-home { display:flex; flex-direction:column; position:fixed; top:64px; left:0; right:0; bottom:0; z-index:1; padding:0 16px calc(14px + env(safe-area-inset-bottom)); }
+  .qm-hero { display:flex; flex-direction:column; align-items:center; text-align:center; margin:auto 0; padding:0 4px; }
+  .qm-pill { display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.75); border:1px solid #E6DCCD; color:#0D5C4D; font-size:12.5px; font-weight:600; padding:6px 14px; border-radius:20px; margin-bottom:14px; backdrop-filter:blur(6px); }
+  .qm-pill i { width:8px; height:8px; border-radius:50%; background:#2ECC71; box-shadow:0 0 0 3px rgba(46,204,113,.2); }
+  .qm-hero h1 { margin:0 0 8px; font-size:30px; color:#0D5C4D; letter-spacing:-.3px; }
+  .qm-hero p { margin:0 0 18px; font-size:14px; color:#6B6B6B; line-height:1.45; max-width:300px; }
+  .qm-glance { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:100%; max-width:340px; }
+  .qm-glance div { background:rgba(255,255,255,.8); border:1px solid #EADFD0; border-radius:14px; padding:10px 4px; }
+  .qm-glance small { display:block; font-size:10.5px; color:#8A7F70; text-transform:uppercase; letter-spacing:.4px; margin-bottom:3px; }
+  .qm-glance b { font-size:15px; color:#0D5C4D; }
+  .qm-search { display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid #0D5C4D; border-radius:28px; height:54px; padding:5px 6px 5px 16px; box-shadow:0 4px 18px rgba(13,92,77,.10); color:#6B6B6B; flex:none; }
+  .qm-search input { flex:1; min-width:0; border:0; outline:0; background:transparent; font:inherit; font-size:16px; color:#1A1A1A; -webkit-appearance:none; appearance:none; }
+  .qm-search button { width:40px; height:40px; border:0; border-radius:50%; background:#0D5C4D; color:#fff; font-size:18px; cursor:pointer; flex:none; }
+  .qm-msg { min-height:18px; font-size:12.5px; color:#a1192b; text-align:center; padding:4px 0 6px; flex:none; }
+  .qm-dock { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; flex:none; }
+  .qm-dock button, .qm-dock a { display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 2px 10px; background:rgba(255,255,255,.88); border:1px solid #EADFD0; border-radius:16px; color:#0D5C4D; text-decoration:none; font-family:inherit; font-size:11.5px; font-weight:600; line-height:1.2; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .qm-dock span { text-align:center; }
+  .qm-dock button:active, .qm-dock a:active { background:#E8F5F1; border-color:#0D5C4D; }
+  /* back-to-home pill on the list / checklist screens */
+  body:not(.q-home) .qm-homebtn { display:inline-flex; align-items:center; margin:14px 16px 0; padding:8px 16px; border:1.5px solid #0D5C4D; background:#fff; color:#0D5C4D; border-radius:20px; font:700 13px 'DM Sans',sans-serif; cursor:pointer; }
+  body:not(.q-home) .page-head { padding-top:12px; }
+  body.q-log .page-head { display:none; }
+}
+@media screen and (max-width: 720px) and (max-height: 660px) { .bg-city { height:100px; bottom:150px; } .qm-hero p { display:none; } }
+
+@media print{
+  body *{visibility:hidden}
+  .rcc,.rcc *{visibility:visible}
+  .rcc{position:absolute;left:0;top:0;padding:0;max-width:none;width:100%}
+  .rcc .rcc-noprint{display:none!important}
+  .rcc .rcc-sheet{border:0;padding:0}
+  .rcc input,.rcc select{background:none!important;border:0;appearance:none;-webkit-appearance:none;padding:0}
+  .rcc .rcc-sign input{border-bottom:1px solid #000}
+  .rcc .rcc-scroll{overflow:visible;border:0}
+  .rcc .rcc-sum{min-width:0;font-size:10px}
+}
+
+@media print {
+  .menu-btn, .sidebar, .top-bar, .page-head, .footer { display:none !important; }
+  .checklist-wrap { padding:0; }
+}
+</style>
+</head>
+<body>
+<div class="bg-deco qm-bg" aria-hidden="true">
+        <div class="bg-blob b1"></div><div class="bg-blob b2"></div><div class="bg-blob b3"></div>
+        <svg class="bg-city" viewBox="0 0 1600 230" preserveAspectRatio="xMidYMax slice" fill="none" stroke="#0D5C4D" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <g opacity=".35">
+                <!-- ground line -->
+                <path d="M0 220 H1600"/>
+                <!-- left: finished house -->
+                <path d="M60 220 V130 L150 70 L240 130 V220"/><path d="M40 138 L150 62 L260 138"/>
+                <rect x="85" y="150" width="34" height="30"/><rect x="180" y="150" width="34" height="30"/><path d="M135 220 V178 H165 V220"/>
+                <!-- tree -->
+                <path d="M300 220 V180"/><circle cx="300" cy="165" r="22"/>
+                <!-- middle-left: two-storey under construction with scaffolding -->
+                <path d="M380 220 V90 H560 V220"/><path d="M370 150 H570"/><path d="M370 90 H570"/>
+                <path d="M420 220 V90 M470 220 V90 M520 220 V90" stroke-dasharray="4 5"/>
+                <path d="M355 220 V70 M380 70 H355 M355 120 H380 M355 170 H380"/><path d="M355 120 L380 170 M380 120 L355 170"/>
+                <rect x="400" y="105" width="30" height="30"/><rect x="495" y="105" width="30" height="30"/>
+            </g>
+            <g opacity=".3">
+                <!-- right: crane -->
+                <path d="M1320 220 V40"/><path d="M1334 220 V40"/>
+                <path d="M1320 60 L1334 80 M1334 80 L1320 100 M1320 100 L1334 120 M1334 120 L1320 140 M1320 140 L1334 160 M1320 160 L1334 180 M1334 180 L1320 200"/>
+                <path d="M1180 40 H1540"/><path d="M1180 52 H1540"/><path d="M1327 40 L1327 18 L1200 40 M1327 18 L1540 40"/>
+                <path d="M1480 52 V120"/><path d="M1468 120 H1492 V136 H1468 Z"/>
+                <rect x="1200" y="52" width="40" height="22"/>
+                <!-- right building frame -->
+                <path d="M1380 220 V120 H1560 V220"/><path d="M1380 170 H1560"/><path d="M1440 220 V120 M1500 220 V120"/>
+                <path d="M1390 120 V104 M1450 120 V104 M1510 120 V104 M1550 120 V104"/>
+            </g>
+            <g opacity=".22">
+                <!-- small homes in the distance -->
+                <path d="M700 220 V185 L730 165 L760 185 V220"/><path d="M780 220 V190 L805 172 L830 190 V220"/>
+                <path d="M1010 220 V180 L1045 158 L1080 180 V220"/><path d="M1100 220 V192 L1122 176 L1144 192 V220"/>
+                <path d="M880 220 V200"/><circle cx="880" cy="190" r="14"/><path d="M960 220 V196"/><circle cx="960" cy="184" r="17"/>
+            </g>
+        </svg>
+    </div>
+
+<div class="qm-home" id="qmHome">
+    <div class="qm-hero">
+        <div class="qm-pill"><i></i><span>Quality Control · 25 activities</span></div>
+        <h1>Quality Checklists</h1>
+        <p>Check every stage, from site handover to final handover</p>
+        <div class="qm-glance">
+            <div><small>Progress</small><b id="qmProg">0%</b></div>
+            <div><small>Completed</small><b id="qmDone">0</b></div>
+            <div><small>In progress</small><b id="qmWip">0</b></div>
+        </div>
+    </div>
+    <form class="qm-search" id="qmSearch" autocomplete="off">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="qmInput" type="search" placeholder="Search an activity, e.g. slab" aria-label="Search an activity (opens its checklist)">
+        <button type="submit" aria-label="Open">↑</button>
+    </form>
+    <div class="qm-msg" id="qmMsg" aria-live="polite"></div>
+    <nav class="qm-dock" aria-label="Quick actions">
+        <button type="button" id="qmGrey"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg><span>Grey Activities</span></button>
+        <button type="button" id="qmFin"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a2 2 0 0 1 2 2v3H4zM18 7h2v6h-8v3"/><rect x="10" y="16" width="4" height="5" rx="1"/></svg><span>Finishing Activities</span></button>
+        <button type="button" id="qmLog"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Daily Activity Log</span></button>
+    </nav>
+</div>
+
+<button class="menu-btn" id="menuBtn"><span></span><span></span><span></span></button>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+        <div class="sidebar-logo" onclick="window.location.href='app.html'" title="Back to NEXTRACK Assistant">
+            <div class="sidebar-logo-text">N</div>
+        </div>
+        <nav class="sidebar-nav">
+            <button class="nav-item" data-tooltip="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            </button>
+            <button class="nav-item" data-tooltip="New Chat">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+            </button>
+            <button class="nav-item" data-tooltip="Calculate Budget" onclick="window.location.href='calculate-budget.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"></rect><path d="M8 6h8M8 10h8M8 14h4"></path></svg>
+            </button>
+            <button class="nav-item" data-tooltip="Construction SOP's">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            </button>
+            <button class="nav-item active" data-tooltip="Quality Checklists">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            </button>
+            <button class="nav-item" data-tooltip="Project" onclick="window.location.href='budget-tracking-system.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </button>
+            <button class="nav-item" data-tooltip="History">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </button>
+        </nav>
+    </div>
+    <div class="sidebar-bottom">
+        <button class="nav-item logout-nav" data-tooltip="Log out" aria-label="Log out" onclick="try{localStorage.removeItem('nextrack-user')}catch(e){};window.location.href='index.html'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+        </button>
+        <div class="user-avatar"><span>B</span></div>
+    </div>
+</aside>
+
+<header class="top-bar">
+    <div class="brand-mini" onclick="window.location.href='app.html'">
+        <div class="dot">N</div>
+        <span class="bm-text"><b>NEX<em>TRACK</em></b><small>Your Home. Our Priority.</small></span>
+    </div>
+    <div class="auth-buttons">
+        <a href="app.html" class="sign-in">My Account</a>
+        <a href="index.html" class="sign-up" onclick="try{localStorage.removeItem('nextrack-user')}catch(e){}">Log out</a>
+    </div>
+    <a href="app.html" class="acct-btn" aria-label="My Account">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+    </a>
+</header>
+
+<button type="button" class="qm-homebtn" id="qmBack">‹ Home</button>
+<section class="page-head">
+    <div class="eyebrow">Quality Control</div>
+    <h1>Quality Checklists for Your House Construction</h1>
+    <p>Track every construction activity from <b>site handover to final handover</b>. Click any activity to open its checklist, mark each item <b>Yes / No / N/A</b>, and the progress and status update automatically. Each checklist can be printed for SE and CM signatures.</p>
+</section>
+
+<main class="checklist-wrap">
+<div class="rcc" id="rcc-app">
+  <!-- SUMMARY VIEW -->
+  <section id="rcc-summary">
+    <h2 class="rcc-title">RESIDENTIAL CONSTRUCTION – ACTIVITY STATUS SUMMARY</h2>
+    <button type="button" class="qm-infotoggle" id="qmInfoToggle" aria-expanded="false" aria-controls="rccInfo"><b>Site details</b><span id="qmInfoSum">Site ID, client, SE, CM, dates</span><i>+</i></button>
+    <div class="rcc-info" id="rccInfo">
+      <label><span>SITE ID :</span><input data-info="siteId"></label>
+      <label><span>CLIENT NAME :</span><input data-info="client"></label>
+      <label><span>SITE ENGINEER (SE) :</span><input data-info="se"></label>
+      <label><span>CONSTRUCTION MANAGER (CM) :</span><input data-info="cm"></label>
+      <label><span>START DATE :</span><input type="date" data-info="start"></label>
+      <label><span>LAST UPDATED :</span><input type="date" data-info="updated"></label>
+    </div>
+
+    <div class="rcc-cards">
+      <div class="rcc-card"><small>Overall progress</small><b id="rcc-k-prog">0%</b></div>
+      <div class="rcc-card"><small>Completed</small><b id="rcc-k-done">0</b></div>
+      <div class="rcc-card"><small>In progress</small><b id="rcc-k-prog2">0</b></div>
+      <div class="rcc-card"><small>Not started</small><b id="rcc-k-not">0</b></div>
+    </div>
+
+    <div class="qm-label" id="qmLabel" hidden></div>
+    <p class="rcc-help">Click any activity name to open its checklist. Mark each item Yes / No / N/A, and the progress and status here update automatically.</p>
+
+    <div class="rcc-toolbar rcc-noprint">
+      <select id="rcc-filter-phase" aria-label="Filter by phase"><option value="">All phases</option></select>
+      <select id="rcc-filter-status" aria-label="Filter by status">
+        <option value="">All statuses</option><option>NOT STARTED</option><option>IN PROGRESS</option><option>COMPLETED</option>
+      </select>
+      <span class="rcc-spacer"></span>
+      <button class="rcc-btn ghost" id="rcc-reset" type="button">Clear all data</button>
+      <button class="rcc-btn" type="button" onclick="window.print()">Print summary</button>
+    </div>
+
+    <div class="rcc-scroll">
+      <table class="rcc-sum">
+        <thead><tr>
+          <th>Sr.</th><th>Checklist #</th><th>Phase</th><th>Activity (click to open)</th><th>Total items</th>
+          <th>Done</th><th>N/A</th><th>Pending</th><th>Progress</th><th>Status</th><th>CM checked</th><th>Remarks</th>
+        </tr></thead>
+        <tbody id="rcc-rows"></tbody>
+        <tfoot><tr>
+          <td colspan="4">OVERALL</td><td id="rcc-t-total"></td><td id="rcc-t-done"></td><td id="rcc-t-na"></td>
+          <td id="rcc-t-pend"></td><td id="rcc-t-prog"></td><td id="rcc-t-stat"></td><td id="rcc-t-cm"></td><td></td>
+        </tr></tfoot>
+      </table>
+    </div>
+  </section>
+
+
+  <!-- DAILY ACTIVITY LOG -->
+  <section id="rcc-log" hidden>
+    <h2 class="rcc-title">DAILY ACTIVITY LOG</h2>
+    <form class="rcc-logform" id="logForm" autocomplete="off">
+      <label class="lf-full"><span>Activity</span><select id="logAct"></select></label>
+      <label><span>Date</span><input type="date" id="logDate"></label>
+      <label><span>Labour on site</span><input id="logLab" inputmode="numeric" placeholder="e.g. 12"></label>
+      <label class="lf-full"><span>Work done today</span><input id="logDesc" placeholder="e.g. Slab shuttering completed, bars tied"></label>
+      <label class="lf-full"><span>Remarks (optional)</span><input id="logRem" placeholder="Delays, issues, materials received…"></label>
+      <div class="lf-err" id="logErr"></div>
+      <button class="rcc-btn lf-full" type="submit">+ Add to log</button>
+    </form>
+    <div class="rcc-logmeta"><b id="logCount">0 entries</b><button type="button" class="rcc-btn ghost" id="logCsv">Export CSV</button></div>
+    <div id="logList"></div>
+  </section>
+
+  <!-- CHECKLIST VIEW -->
+  <section id="rcc-detail" hidden>
+    <div class="rcc-nav rcc-noprint">
+      <button class="rcc-btn ghost" type="button" id="rcc-back">◄ Back to summary</button>
+      <button class="rcc-btn ghost" type="button" id="rcc-prev">‹ Previous</button>
+      <button class="rcc-btn ghost" type="button" id="rcc-next">Next ›</button>
+      <button class="rcc-btn" type="button" onclick="window.print()">Print checklist</button>
+      <span class="rcc-stat"><span id="rcc-d-count"></span><span id="rcc-d-badge"></span></span>
+    </div>
+    <div class="rcc-sheet" id="rcc-sheet"></div>
+  </section>
+</div>
+</main>
+
+<footer class="footer">
+    Residential Construction • AI-Powered Project Control
+</footer>
+
+<script>
+const menuBtn = document.getElementById('menuBtn');
+const sidebar = document.getElementById('sidebar');
+menuBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    menuBtn.classList.toggle('open');
+});
+document.addEventListener('click', (e) => {
+    if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+        sidebar.classList.remove('open'); menuBtn.classList.remove('open');
+    }
+});
+</script>
+
+<script>
+(function () {
+  /* ====== ACTIVITY DATA: edit titles / items here ====== */
+  var ACTS = [
+ {
+  "phase": "Pre-Construction",
+  "title": "SITE HANDOVER & MOBILIZATION",
+  "type": "I",
+  "line": "SITE TO BE CHECKED FOR THE FOLLOWING BEFORE START OF WORK",
+  "items": [
+   "Plot possession / handover letter received from client",
+   "Plot boundary & corner pegs verified with site plan",
+   "Approved building plan (authority approval) copy available at site",
+   "Site office / store / labour shed established",
+   "Temporary water & electricity connection arranged",
+   "Safety signboard, barricading & first aid box installed",
+   "Neighbour building condition photographs taken & recorded"
+  ]
+ },
+ {
+  "phase": "Pre-Construction",
+  "title": "RECEIVING OF STRUCTURAL & ARCHITECTURAL DRAWINGS",
+  "type": "R",
+  "line": "IT IS REQUESTED TO KINDLY ISSUE THE FOLLOWING ITEMS",
+  "items": [
+   "2 sets of approved architectural drawings (signed by Architect & Client)",
+   "2 sets of structural drawings (signed by Structural Engineer)",
+   "Soil investigation report",
+   "Approved submission drawings from authority",
+   "Construction schedule / work programme"
+  ]
+ },
+ {
+  "phase": "Pre-Construction",
+  "title": "RECEIVING OF MEP DRAWINGS",
+  "type": "R",
+  "line": "IT IS REQUESTED TO KINDLY ISSUE THE FOLLOWING ITEMS",
+  "items": [
+   "2 sets of electrical drawings (lighting, power, DB schedule)",
+   "2 sets of plumbing & drainage drawings",
+   "HVAC / AC points & drain layout",
+   "Low-current drawings (CCTV, data, TV, intercom)",
+   "Solar / generator / UPS provision drawings (if applicable)"
+  ]
+ },
+ {
+  "phase": "Pre-Construction",
+  "title": "RECEIVING OF FINISHING BOOK",
+  "type": "R",
+  "line": "IT IS REQUESTED TO KINDLY ISSUE THE FOLLOWING ITEMS",
+  "items": [
+   "2 sets of finishes drawings book (signed by Architect/Interior Designer & Client)",
+   "Approved submission fire alarm drawings (in case of DHA projects)",
+   "Colored images of tiles / bath accessories / all reference images of ceiling & walls",
+   "A signed copy of BOQ issued by Contract Engineer"
+  ]
+ },
+ {
+  "phase": "Substructure",
+  "title": "LAYOUT & SETTING OUT",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS BEFORE EXCAVATION",
+  "items": [
+   "Reference bench mark (BM) established & protected",
+   "Grid lines / centre lines marked as per drawing",
+   "Diagonals checked for squareness",
+   "Setbacks from plot boundary verified as per approved plan",
+   "Layout checked & signed by CM before excavation"
+  ]
+ },
+ {
+  "phase": "Substructure",
+  "title": "EXCAVATION",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS DURING / AFTER EXCAVATION",
+  "items": [
+   "Excavation depth as per structural drawing",
+   "Excavation width / working space adequate",
+   "Bottom levelled, compacted & free of loose soil",
+   "Dewatering arranged (if water table encountered)",
+   "Side protection / shoring for adjacent structures",
+   "Excavated soil stacked away from pit edge"
+  ]
+ },
+ {
+  "phase": "Substructure",
+  "title": "ANTI-TERMITE, SOLING & PCC (BLINDING)",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS BEFORE & AFTER PCC",
+  "items": [
+   "Anti-termite treatment applied (chemical & dilution as specified)",
+   "Soling / hardcore laid & compacted",
+   "Polythene sheet laid (if specified)",
+   "PCC thickness & mix ratio as per drawing",
+   "PCC level & finish checked"
+  ]
+ },
+ {
+  "phase": "Substructure",
+  "title": "FOUNDATION STEEL & SHUTTERING (PRE-POUR)",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS BEFORE CONCRETE POUR",
+  "items": [
+   "Bar diameter, spacing & number as per drawing",
+   "Lap length, bends & hooks as per specification",
+   "Column starter bars location & alignment",
+   "Cover blocks provided (size as specified)",
+   "Shuttering line, level & rigidity checked",
+   "Shuttering cleaned & oiled",
+   "Earthing strip / conduit sleeves placed (if required)"
+  ]
+ },
+ {
+  "phase": "Substructure",
+  "title": "FOUNDATION CONCRETING & CURING",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS DURING & AFTER POUR",
+  "items": [
+   "Concrete mix design / ratio approved",
+   "Slump test carried out",
+   "Test cubes / cylinders taken & labelled",
+   "Vibrator used & concrete properly compacted",
+   "Curing started & curing log maintained"
+  ]
+ },
+ {
+  "phase": "Substructure",
+  "title": "PLINTH BEAM, DPC & BACKFILLING",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS",
+  "items": [
+   "Plinth beam steel & shuttering checked before pour",
+   "Plinth level verified against bench mark",
+   "Damp proof course (DPC) applied as specified",
+   "Backfilling in layers with watering & compaction",
+   "Under-floor drainage / sewer pipes laid before backfill"
+  ]
+ },
+ {
+  "phase": "Superstructure",
+  "title": "COLUMNS (STEEL, SHUTTERING & POUR)",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS BEFORE & AFTER POUR",
+  "items": [
+   "Column location & plumb checked",
+   "Main bars & ties spacing as per drawing",
+   "Cover blocks provided",
+   "Shuttering tight, plumb & braced",
+   "Concrete poured in layers & vibrated",
+   "Curing done after de-shuttering"
+  ]
+ },
+ {
+  "phase": "Superstructure",
+  "title": "BEAM & SLAB SHUTTERING / REINFORCEMENT (PRE-POUR)",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS BEFORE CONCRETE POUR",
+  "items": [
+   "Shuttering level, camber & props checked",
+   "Beam & slab bottom / top steel as per drawing",
+   "Extra bars at openings / cantilevers provided",
+   "Chairs & cover blocks provided",
+   "Electrical conduits & boxes in slab fixed (checked by electrician)",
+   "Plumbing sleeves / shafts openings kept",
+   "Slab thickness & edge shuttering checked",
+   "Pour approval signed by CM"
+  ]
+ },
+ {
+  "phase": "Superstructure",
+  "title": "SLAB CONCRETING & CURING",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS DURING & AFTER POUR",
+  "items": [
+   "Concrete quantity / mix / batching confirmed",
+   "Slump test carried out",
+   "Test cubes taken & labelled",
+   "Concrete vibrated & surface finished",
+   "Ponding / curing started & maintained (min. 7 days)",
+   "De-shuttering time as per specification"
+  ]
+ },
+ {
+  "phase": "Superstructure",
+  "title": "BRICK / BLOCK MASONRY",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS DURING MASONRY WORK",
+  "items": [
+   "Bricks / blocks soaked & quality checked",
+   "Mortar ratio as per specification",
+   "Wall line, plumb & level checked",
+   "Door / window openings as per drawing",
+   "Lintels provided above openings",
+   "Wall ties / dowels with RCC columns provided",
+   "Curing of masonry done"
+  ]
+ },
+ {
+  "phase": "MEP Rough-In",
+  "title": "ELECTRICAL CONDUITING (CONCEALED)",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS BEFORE PLASTER",
+  "items": [
+   "Conduit size & route as per electrical drawing",
+   "Switch / socket box positions & heights checked",
+   "DB location & size as per drawing",
+   "Pull wire inserted in all conduits",
+   "AC, geyser & heavy load points provided",
+   "Low-current conduits (CCTV, data, TV) separated"
+  ]
+ },
+ {
+  "phase": "MEP Rough-In",
+  "title": "PLUMBING & DRAINAGE (CONCEALED) + PRESSURE TEST",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS BEFORE PLASTER / FLOORING",
+  "items": [
+   "Water supply pipe material & size as per drawing",
+   "Hot & cold water lines separated & insulated (if specified)",
+   "Pressure test carried out & recorded (no leakage)",
+   "Drain pipe slopes checked",
+   "Floor trap / nahani trap levels checked",
+   "Fixture points heights as per finishing book",
+   "Manholes / inspection chambers constructed"
+  ]
+ },
+ {
+  "phase": "Finishing",
+  "title": "WATERPROOFING (ROOF & WET AREAS)",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS",
+  "items": [
+   "Surface cleaned & prepared",
+   "Waterproofing material approved",
+   "Application as per manufacturer / specification",
+   "Upturn on walls provided in wet areas",
+   "Ponding / flood test done (24–48 hrs) with no leakage",
+   "Roof slope towards rain water outlets checked"
+  ]
+ },
+ {
+  "phase": "Finishing",
+  "title": "PLASTER (INTERNAL & EXTERNAL)",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS",
+  "items": [
+   "All conduits / pipes completed before plaster",
+   "Chicken mesh at RCC-masonry joints",
+   "Plaster ratio & thickness as specified",
+   "Plaster plumb & line checked",
+   "Corners, edges & grooves as per drawing",
+   "Curing done"
+  ]
+ },
+ {
+  "phase": "Finishing",
+  "title": "FLOORING & WALL TILING",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS",
+  "items": [
+   "Tiles as per approved finishing book (type, size, color)",
+   "Tile layout / pattern approved before start",
+   "Floor levels & slopes in wet areas checked",
+   "Joints, spacers & line checked",
+   "Hollowness checked (tap test)",
+   "Grouting & cleaning done"
+  ]
+ },
+ {
+  "phase": "Finishing",
+  "title": "DOORS & WINDOWS",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS",
+  "items": [
+   "Frames fixed in line, level & plumb",
+   "Door shutters as per finishing book",
+   "Windows / glass as per specification",
+   "Hardware (locks, hinges, handles) fixed & working",
+   "Sealant around windows applied"
+  ]
+ },
+ {
+  "phase": "Finishing",
+  "title": "FALSE CEILING",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS",
+  "items": [
+   "Ceiling design as per finishing book",
+   "Ceiling level & framing checked",
+   "Light / AC / smoke detector cut-outs as per drawing",
+   "Access panels provided where required",
+   "Joints taped & finished"
+  ]
+ },
+ {
+  "phase": "Finishing",
+  "title": "PAINT & POLISH",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS",
+  "items": [
+   "Surface preparation (putty / sanding) done",
+   "Paint brand & shade as per finishing book",
+   "Primer & number of coats as specified",
+   "Wood polish / lacquer finish checked",
+   "No patches, drips or brush marks"
+  ]
+ },
+ {
+  "phase": "Finishing",
+  "title": "SANITARY & ELECTRICAL FIXTURES INSTALLATION",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS",
+  "items": [
+   "Sanitary ware & accessories as per finishing book",
+   "Fixtures fixed level & secure, no leakage",
+   "Switches / sockets / lights installed & working",
+   "DB labelling & earthing checked",
+   "Insulation / megger test done & recorded",
+   "Geysers, pumps & tanks tested"
+  ]
+ },
+ {
+  "phase": "Finishing",
+  "title": "EXTERNAL WORKS & BOUNDARY WALL",
+  "type": "I",
+  "line": "INSPECTION OF FOLLOWING ITEMS",
+  "items": [
+   "Boundary wall & gate as per drawing",
+   "Driveway / porch flooring completed",
+   "External drainage & rain water disposal working",
+   "Landscaping / planters as per design",
+   "Main gate & external lights installed"
+  ]
+ },
+ {
+  "phase": "Handover",
+  "title": "FINAL SNAGGING & HANDOVER",
+  "type": "I",
+  "line": "THE FOLLOWING ITEMS TO BE COMPLETED BEFORE HANDOVER",
+  "items": [
+   "Snag list prepared with client / architect",
+   "All snags rectified & re-checked",
+   "Final cleaning of house done",
+   "Keys handed over with key register",
+   "As-built drawings handed over",
+   "Warranty cards & manuals handed over",
+   "Completion certificate / handover letter signed by client"
+  ]
+ }
+];
+  /* ====================================================== */
+
+  var KEY = "nvhomes-quality-checklists-v1";
+  var GREY_N = 18, partFilter = "";   /* activities 1-18 = grey structure, 19-25 = finishing */
+  var root = document.getElementById("rcc-app");
+  var $ = function (id) { return document.getElementById(id); };
+  var state = load();
+
+  function load() {
+    try { var s = JSON.parse(localStorage.getItem(KEY)); if (s && s.acts) return s; } catch (e) {}
+    return { info: {}, acts: {} };
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function act(i) { return state.acts[i] || (state.acts[i] = { v: {}, r: {}, cm: "", rem: "", date: "", sig: {} }); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+
+  function stats(i) {
+    var a = act(i), total = ACTS[i].items.length, done = 0, na = 0;
+    for (var k = 0; k < total; k++) { if (a.v[k] === "Yes") done++; else if (a.v[k] === "N/A") na++; }
+    var pend = total - done - na, base = total - na;
+    var prog = base === 0 ? (na ? 1 : 0) : done / base;
+    var status = done + na === 0 ? "NOT STARTED" : pend === 0 ? "COMPLETED" : "IN PROGRESS";
+    return { total: total, done: done, na: na, pend: pend, prog: prog, status: status };
+  }
+  function badge(st) {
+    var c = st === "COMPLETED" ? "st-done" : st === "IN PROGRESS" ? "st-prog" : "st-not";
+    return '<span class="rcc-badge ' + c + '">' + st + "</span>";
+  }
+  function bar(p) {
+    var pc = Math.round(p * 100);
+    return '<div class="rcc-bar"><i style="width:' + pc + '%"></i><em>' + pc + "%</em></div>";
+  }
+
+  /* ---------- summary ---------- */
+  var phases = [];
+  ACTS.forEach(function (a) { if (phases.indexOf(a.phase) < 0) phases.push(a.phase); });
+  phases.forEach(function (p) { $("rcc-filter-phase").insertAdjacentHTML("beforeend", "<option>" + esc(p) + "</option>"); });
+
+  function renderSummary() {
+    var fp = $("rcc-filter-phase").value, fs = $("rcc-filter-status").value, html = "";
+    var T = { total: 0, done: 0, na: 0, pend: 0 }, cnt = { "COMPLETED": 0, "IN PROGRESS": 0, "NOT STARTED": 0 }, cm = 0;
+    ACTS.forEach(function (A, i) {
+      var s = stats(i), a = act(i);
+      T.total += s.total; T.done += s.done; T.na += s.na; T.pend += s.pend; cnt[s.status]++;
+      if (a.cm === "Yes") cm++;
+      if ((fp && A.phase !== fp) || (fs && s.status !== fs)) return;
+      if ((partFilter === "grey" && i >= GREY_N) || (partFilter === "finishing" && i < GREY_N)) return;
+      html += "<tr>" +
+        "<td>" + (i + 1) + "</td><td>#" + pad(i + 1) + '</td><td class="l rcc-phase">' + esc(A.phase) + "</td>" +
+        '<td class="l"><a class="rcc-link" href="#cl-' + pad(i + 1) + '" data-open="' + i + '">' + esc(A.title) + "</a></td>" +
+        "<td>" + s.total + "</td><td>" + s.done + "</td><td>" + s.na + "</td><td>" + s.pend + "</td>" +
+        "<td>" + bar(s.prog) + "</td><td>" + badge(s.status) + "</td>" +
+        '<td><select data-cm="' + i + '" aria-label="CM checked"><option></option><option' + (a.cm === "Yes" ? " selected" : "") + ">Yes</option><option" + (a.cm === "No" ? " selected" : "") + ">No</option></select></td>" +
+        '<td><input data-rem="' + i + '" value="' + esc(a.rem) + '" aria-label="Remarks"></td></tr>';
+    });
+    $("rcc-rows").innerHTML = html || '<tr><td colspan="12">No activities match this filter.</td></tr>';
+    var op = T.total - T.na === 0 ? 0 : T.done / (T.total - T.na);
+    $("rcc-t-total").textContent = T.total; $("rcc-t-done").textContent = T.done;
+    $("rcc-t-na").textContent = T.na; $("rcc-t-pend").textContent = T.pend;
+    $("rcc-t-prog").innerHTML = bar(op);
+    $("rcc-t-stat").textContent = cnt["COMPLETED"] + " / " + ACTS.length + " DONE";
+    $("rcc-t-cm").textContent = cm + " / " + ACTS.length;
+    $("rcc-k-prog").textContent = Math.round(op * 100) + "%";
+    $("rcc-k-done").textContent = cnt["COMPLETED"];
+    $("rcc-k-prog2").textContent = cnt["IN PROGRESS"];
+    $("rcc-k-not").textContent = cnt["NOT STARTED"];
+    labelCells();
+  }
+  /* data-l labels let the phone layout show each table row as a card */
+  function labelCells() {
+    var L = ["Sr.", "Checklist #", "Phase", "Activity", "Total", "Done", "N/A", "Pending", "Progress", "Status", "CM checked", "Remarks"];
+    root.querySelectorAll(".rcc-sum tbody tr").forEach(function (tr) {
+      if (tr.children.length === 12) Array.prototype.forEach.call(tr.children, function (td, k) { td.setAttribute("data-l", L[k]); });
+    });
+    var F = ["", "Total", "Done", "N/A", "Pending", "Progress", "Status", "CM checked", ""];
+    root.querySelectorAll(".rcc-sum tfoot tr td").forEach(function (td, k) { td.setAttribute("data-l", F[k] || ""); });
+  }
+
+  root.querySelectorAll("[data-info]").forEach(function (el) {
+    el.value = state.info[el.dataset.info] || "";
+    el.addEventListener("input", function () { state.info[el.dataset.info] = el.value; save(); });
+  });
+  $("rcc-filter-phase").addEventListener("change", renderSummary);
+  $("rcc-filter-status").addEventListener("change", renderSummary);
+  $("rcc-rows").addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.dataset.cm != null) { act(+t.dataset.cm).cm = t.value; save(); renderSummary(); }
+  });
+  $("rcc-rows").addEventListener("input", function (e) {
+    var t = e.target;
+    if (t.dataset.rem != null) { act(+t.dataset.rem).rem = t.value; save(); }
+  });
+  $("rcc-reset").addEventListener("click", function () {
+    if (confirm("Clear all entered data for every checklist?")) {
+      state = { info: {}, acts: {} }; save();
+      root.querySelectorAll("[data-info]").forEach(function (el) { el.value = ""; });
+      renderSummary();
+    }
+  });
+
+  /* ---------- checklist ---------- */
+  var current = -1;
+  function renderDetail(i) {
+    var A = ACTS[i], a = act(i), isR = A.type === "R";
+    var sig = isR
+      ? [["ISSUED BY", "(To Be filled by Coord. dept)"], ["RECEIVED BY", "(To Be filled by SE)"], ["ACKNOWLEDGED BY", "(To Be filled by CM)"]]
+      : [["CHECKED BY", "(To Be filled by SE)"], ["VERIFIED BY", "(To Be filled by CM)"], ["ACKNOWLEDGED BY", "(Client / Architect Rep.)"]];
+    var rows = A.items.map(function (it, k) {
+      var v = a.v[k] || "", cls = v ? "v-" + v.replace("/", "") : "";
+      var extra = (A.title === "RECEIVING OF FINISHING BOOK" && k === 3) ? ' <span class="rcc-hl">(TO DISCUSS)</span>' : "";
+      return '<tr><td class="c">' + (k + 1) + "</td><td>" + esc(it.toUpperCase()) + extra + "</td>" +
+        '<td class="c"><select class="' + cls + '" data-v="' + k + '" aria-label="Status"><option></option>' +
+        ["Yes", "No", "N/A"].map(function (o) { return "<option" + (v === o ? " selected" : "") + ">" + o + "</option>"; }).join("") +
+        '</select></td><td><input data-r="' + k + '" value="' + esc(a.r[k]) + '" aria-label="Remarks"></td></tr>';
+    }).join("");
+    $("rcc-sheet").innerHTML =
+      '<p class="rcc-no">CHECKLIST#' + pad(i + 1) + '</p><p class="rcc-by">(TO BE FILLED BY SE &amp; CHECKED BY CM)</p>' +
+      '<h3 class="rcc-h">' + esc(A.title) + "</h3>" +
+      '<table class="rcc-cl"><colgroup><col class="w-sr"><col><col class="w-st"><col class="w-rm"></colgroup><thead>' +
+      '<tr><td colspan="4" class="hd">' + esc(A.line) + "</td></tr>" +
+      '<tr><td colspan="4"><div class="site"><span>SITE ID : ' + esc(state.info.siteId) + "</span><span>CLIENT NAME : " + esc(state.info.client) + "</span></div></td></tr>" +
+      '<tr><th>SR.</th><th>ITEM</th><th>' + (isR ? "RECEIVED" : "CHECKED") + '</th><th>REMARKS</th></tr>' +
+      "</thead><tbody>" + rows + "</tbody></table>" +
+      '<div class="rcc-date">DATE : <input type="date" data-date value="' + esc(a.date) + '"></div>' +
+      '<div class="rcc-signs">' +
+      '<div class="rcc-sign"><b>' + sig[0][0] + "</b><small>" + sig[0][1] + '</small><input data-s="0" placeholder="Name / Sign" value="' + esc(a.sig[0]) + '"></div>' +
+      '<div class="rcc-sign r"><b>' + sig[1][0] + "</b><small>" + sig[1][1] + '</small><input data-s="1" placeholder="Name / Sign" value="' + esc(a.sig[1]) + '"></div>' +
+      '<div class="rcc-sign c"><b>' + sig[2][0] + "</b><small>" + sig[2][1] + '</small><input data-s="2" placeholder="Name / Sign" value="' + esc(a.sig[2]) + '"></div>' +
+      "</div>";
+    updateDetailStat(i);
+    $("rcc-prev").disabled = i === 0; $("rcc-next").disabled = i === ACTS.length - 1;
+  }
+  function updateDetailStat(i) {
+    var s = stats(i);
+    $("rcc-d-count").textContent = s.done + " done · " + s.na + " N/A · " + s.pend + " pending";
+    $("rcc-d-badge").innerHTML = badge(s.status);
+  }
+  $("rcc-sheet").addEventListener("change", function (e) {
+    var t = e.target, a = act(current);
+    if (t.dataset.v != null) { a.v[t.dataset.v] = t.value; t.className = t.value ? "v-" + t.value.replace("/", "") : ""; updateDetailStat(current); }
+    save();
+  });
+  $("rcc-sheet").addEventListener("input", function (e) {
+    var t = e.target, a = act(current);
+    if (t.dataset.r != null) a.r[t.dataset.r] = t.value;
+    else if (t.dataset.s != null) a.sig[t.dataset.s] = t.value;
+    else if (t.hasAttribute("data-date")) a.date = t.value;
+    save();
+  });
+
+
+
+  /* phone: site details are collapsed behind one line */
+  (function () {
+    var t = $("qmInfoToggle"), info = $("rccInfo");
+    function sum() {
+      var v = function (k) { return (state.info[k] || "").trim(); };
+      var bits = [v("siteId") && "ID " + v("siteId"), v("client"), v("se") && "SE " + v("se"), v("cm") && "CM " + v("cm")].filter(Boolean);
+      $("qmInfoSum").textContent = bits.length ? bits.join(" · ") : "Site ID, client, SE, CM, dates";
+    }
+    t.addEventListener("click", function () { var o = info.classList.toggle("open"); t.setAttribute("aria-expanded", o ? "true" : "false"); sum(); });
+    info.addEventListener("input", sum); sum();
+  })();
+
+  /* ---------- daily activity log ---------- */
+  var LOG_KEY = "nextrack-daily-log-v1";
+  function loadLog() { try { var l = JSON.parse(localStorage.getItem(LOG_KEY)); if (Array.isArray(l)) return l; } catch (e) {} return []; }
+  function saveLog(l) { try { localStorage.setItem(LOG_KEY, JSON.stringify(l)); } catch (e) {} }
+  function today() { var d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function fmtDate(iso) { var d = new Date(iso + "T00:00:00"); return isNaN(d) ? iso : d.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }); }
+  function renderLog() {
+    var sel = $("logAct");
+    if (!sel.options.length) {
+      sel.innerHTML = '<option value="">Select activity…</option><optgroup label="Grey structure">' +
+        ACTS.slice(0, GREY_N).map(function (A, i) { return '<option value="' + i + '">' + (i + 1) + ". " + esc(A.title) + "</option>"; }).join("") +
+        '</optgroup><optgroup label="Finishing">' +
+        ACTS.slice(GREY_N).map(function (A, k) { var i = k + GREY_N; return '<option value="' + i + '">' + (i + 1) + ". " + esc(A.title) + "</option>"; }).join("") + "</optgroup>";
+    }
+    if (!$("logDate").value) $("logDate").value = today();
+    var log = loadLog().sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || (b.id > a.id ? 1 : -1); });
+    $("logCount").textContent = log.length + (log.length === 1 ? " entry" : " entries");
+    if (!log.length) { $("logList").innerHTML = '<div class="rcc-logempty">No entries yet. Add what was done on site today.</div>'; return; }
+    var html = "", last = "";
+    log.forEach(function (e) {
+      if (e.date !== last) { html += '<div class="rcc-logdate">' + esc(fmtDate(e.date)) + "</div>"; last = e.date; }
+      html += '<div class="rcc-logitem"><div class="top"><span>' + (e.labour ? esc(e.labour) + " labour" : "Labour –") + "</span></div><b>" + esc(ACTS[e.act] ? (e.act + 1) + ". " + ACTS[e.act].title : "General") + "</b><p>" + esc(e.desc) + "</p>" +
+        (e.rem ? '<p class="rem">' + esc(e.rem) + "</p>" : "") + '<button type="button" data-logdel="' + esc(e.id) + '">Delete</button></div>';
+    });
+    $("logList").innerHTML = html;
+  }
+  $("logForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var act = $("logAct").value, date = $("logDate").value, desc = $("logDesc").value.trim();
+    if (act === "" ) { $("logErr").textContent = "Please select an activity."; return; }
+    if (!date) { $("logErr").textContent = "Please choose a date."; return; }
+    if (!desc) { $("logErr").textContent = "Please write what work was done."; return; }
+    $("logErr").textContent = "";
+    var l = loadLog(); l.push({ id: String(Date.now()), date: date, act: +act, desc: desc, labour: $("logLab").value.trim(), rem: $("logRem").value.trim() });
+    saveLog(l); $("logDesc").value = ""; $("logRem").value = ""; renderLog();
+  });
+  $("logList").addEventListener("click", function (e) {
+    var id = e.target.dataset && e.target.dataset.logdel;
+    if (id && confirm("Delete this log entry?")) { saveLog(loadLog().filter(function (x) { return x.id !== id; })); renderLog(); }
+  });
+  $("logCsv").addEventListener("click", function () {
+    var rows = [["Date", "Activity no.", "Activity", "Labour", "Work done", "Remarks"]];
+    loadLog().sort(function (a, b) { return (a.date || "").localeCompare(b.date || ""); }).forEach(function (e) { rows.push([e.date, e.act + 1, ACTS[e.act] ? ACTS[e.act].title : "", e.labour, e.desc, e.rem]); });
+    var csv = rows.map(function (r) { return r.map(function (c) { c = c == null ? "" : String(c); return /[",\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }).join(","); }).join("\n");
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "daily-activity-log.csv"; a.click();
+  });
+
+  /* ---------- navigation (each checklist has its own link: #cl-01 … #cl-25) ---------- */
+  function show(scroll) {
+    var h = location.hash, m = /^#cl-(\d+)$/.exec(h), i = m ? parseInt(m[1], 10) - 1 : -1;
+    if (h === "#grey") partFilter = "grey"; else if (h === "#finishing") partFilter = "finishing";
+    $("rcc-log").hidden = true;
+    if (i >= 0 && i < ACTS.length) {
+      current = i; renderDetail(i);
+      $("rcc-summary").hidden = true; $("rcc-detail").hidden = false;
+    } else if (h === "#log") {
+      current = -1; renderLog();
+      $("rcc-summary").hidden = true; $("rcc-detail").hidden = true; $("rcc-log").hidden = false;
+    } else {
+      current = -1; renderSummary();
+      var lab = $("qmLabel");
+      lab.hidden = !partFilter; lab.textContent = partFilter === "grey" ? "Grey Activities · 1–" + GREY_N : partFilter === "finishing" ? "Finishing Activities · " + (GREY_N + 1) + "–" + ACTS.length : "";
+      $("rcc-detail").hidden = true; $("rcc-summary").hidden = false;
+    }
+    if (typeof applyMode === "function") applyMode();
+    if (scroll !== false) window.scrollTo({ top: Math.max(0, root.getBoundingClientRect().top + window.scrollY - 20) });
+  }
+  function go(i) { location.hash = i < 0 ? "summary" : "cl-" + pad(i + 1); }
+
+  /* ---------- phone home screen ---------- */
+  var listMode = false, phoneMQ = window.matchMedia("(max-width:720px)");
+  function applyMode() {
+    if (current >= 0 || /^#(summary|log|grey|finishing)$/.test(location.hash)) listMode = true;
+    var home = phoneMQ.matches && current < 0 && !listMode;
+    document.body.classList.toggle("q-home", home);
+    document.body.classList.toggle("q-log", location.hash === "#log");
+    if (home) {
+      $("qmProg").textContent = $("rcc-k-prog").textContent;
+      $("qmDone").textContent = $("rcc-k-done").textContent;
+      $("qmWip").textContent = $("rcc-k-prog2").textContent;
+    }
+  }
+  $("qmGrey").addEventListener("click", function () { listMode = true; location.hash = "grey"; });
+  $("qmFin").addEventListener("click", function () { listMode = true; location.hash = "finishing"; });
+  $("qmLog").addEventListener("click", function () { listMode = true; location.hash = "log"; });
+  $("qmBack").addEventListener("click", function () { listMode = false; partFilter = ""; history.replaceState(null, "", location.pathname); current = -1; show(false); window.scrollTo(0, 0); });
+  $("qmSearch").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var q = $("qmInput").value.trim().toLowerCase(), msg = $("qmMsg"); msg.textContent = "";
+    if (!q) return;
+    var hit = -1;
+    ACTS.forEach(function (A, i) { if (hit < 0 && (A.title.toLowerCase().indexOf(q) >= 0 || A.items.some(function (t) { return t.toLowerCase().indexOf(q) >= 0; }))) hit = i; });
+    if (hit < 0) { msg.textContent = "No activity found for “" + $("qmInput").value.trim() + "”"; return; }
+    go(hit);
+  });
+  phoneMQ.addEventListener ? phoneMQ.addEventListener("change", applyMode) : phoneMQ.addListener(applyMode);
+  (function () { var svg = document.querySelector(".bg-city"); if (!svg) return; function fit() { svg.setAttribute("viewBox", window.innerWidth <= 720 ? "30 0 560 230" : "0 0 1600 230"); } fit(); window.addEventListener("resize", fit); })();
+  $("rcc-back").addEventListener("click", function () { go(-1); });
+  $("rcc-prev").addEventListener("click", function () { if (current > 0) go(current - 1); });
+  $("rcc-next").addEventListener("click", function () { if (current < ACTS.length - 1) go(current + 1); });
+  window.addEventListener("hashchange", function () { show(true); });
+  show(/^#cl-\d+$/.test(location.hash));
+  applyMode();
+})();
+</script>
+
+</body>
+</html>

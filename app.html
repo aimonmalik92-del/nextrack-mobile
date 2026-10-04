@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXTRACK - AI Powered Home Construction Assistant</title>
+
+    <link rel="stylesheet" href="style.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="page-app">
+
+    <!-- Background decoration -->
+    <div class="bg-deco" aria-hidden="true">
+        <div class="bg-blob b1"></div><div class="bg-blob b2"></div><div class="bg-blob b3"></div>
+        <svg class="bg-city" viewBox="0 0 1600 230" preserveAspectRatio="xMidYMax slice" fill="none" stroke="#0D5C4D" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <g opacity=".35">
+                <!-- ground line -->
+                <path d="M0 220 H1600"/>
+                <!-- left: finished house -->
+                <path d="M60 220 V130 L150 70 L240 130 V220"/><path d="M40 138 L150 62 L260 138"/>
+                <rect x="85" y="150" width="34" height="30"/><rect x="180" y="150" width="34" height="30"/><path d="M135 220 V178 H165 V220"/>
+                <!-- tree -->
+                <path d="M300 220 V180"/><circle cx="300" cy="165" r="22"/>
+                <!-- middle-left: two-storey under construction with scaffolding -->
+                <path d="M380 220 V90 H560 V220"/><path d="M370 150 H570"/><path d="M370 90 H570"/>
+                <path d="M420 220 V90 M470 220 V90 M520 220 V90" stroke-dasharray="4 5"/>
+                <path d="M355 220 V70 M380 70 H355 M355 120 H380 M355 170 H380"/><path d="M355 120 L380 170 M380 120 L355 170"/>
+                <rect x="400" y="105" width="30" height="30"/><rect x="495" y="105" width="30" height="30"/>
+            </g>
+            <g opacity=".3">
+                <!-- right: crane -->
+                <path d="M1320 220 V40"/><path d="M1334 220 V40"/>
+                <path d="M1320 60 L1334 80 M1334 80 L1320 100 M1320 100 L1334 120 M1334 120 L1320 140 M1320 140 L1334 160 M1320 160 L1334 180 M1334 180 L1320 200"/>
+                <path d="M1180 40 H1540"/><path d="M1180 52 H1540"/><path d="M1327 40 L1327 18 L1200 40 M1327 18 L1540 40"/>
+                <path d="M1480 52 V120"/><path d="M1468 120 H1492 V136 H1468 Z"/>
+                <rect x="1200" y="52" width="40" height="22"/>
+                <!-- right building frame -->
+                <path d="M1380 220 V120 H1560 V220"/><path d="M1380 170 H1560"/><path d="M1440 220 V120 M1500 220 V120"/>
+                <path d="M1390 120 V104 M1450 120 V104 M1510 120 V104 M1550 120 V104"/>
+            </g>
+            <g opacity=".22">
+                <!-- small homes in the distance -->
+                <path d="M700 220 V185 L730 165 L760 185 V220"/><path d="M780 220 V190 L805 172 L830 190 V220"/>
+                <path d="M1010 220 V180 L1045 158 L1080 180 V220"/><path d="M1100 220 V192 L1122 176 L1144 192 V220"/>
+                <path d="M880 220 V200"/><circle cx="880" cy="190" r="14"/><path d="M960 220 V196"/><circle cx="960" cy="184" r="17"/>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Hamburger Button -->
+    <button class="menu-btn" id="menuBtn">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- Left Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <div class="sidebar-logo" style="cursor:pointer" onclick="window.location.href='index.html'" title="Back to Homepage">
+                <div class="sidebar-logo-text">N</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item" data-tooltip="Search">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.3-4.3"></path>
+                    </svg>
+                </button>
+
+                <button class="nav-item" data-tooltip="New Chat">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"></path>
+                    </svg>
+                </button>
+
+                <button class="nav-item" data-tooltip="Calculate Budget" onclick="window.location.href='calculate-budget.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+                        <path d="M8 6h8M8 10h8M8 14h4"></path>
+                    </svg>
+                </button>
+
+                <button class="nav-item" data-tooltip="Construction SOP's">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                </button>
+
+                <button class="nav-item" data-tooltip="Quality Checklists" onclick="window.location.href='quality-checklist.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                </button>
+
+                <button class="nav-item" data-tooltip="Project">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                </button>
+
+                <button class="nav-item" data-tooltip="History">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="user-avatar" data-tooltip="User Account">
+                <span>B</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <header class="top-bar">
+            <div></div>
+            <div class="auth-buttons">
+                <span class="sign-in" id="userName" style="cursor:default" hidden>My Account</span>
+                <a href="#" class="sign-up" id="logoutBtn" hidden>Log out</a>
+                <button type="button" class="sign-up al-open" id="authOpen">Log in / Sign up</button>
+            </div>
+        </header>
+
+        <main class="hero">
+            <div class="greet" id="greet"><i></i><span>Welcome to NEXTRACK</span></div>
+            <div class="logo-section">
+                <div class="logo-circle">
+                    <img src="logo.png" alt="NexTrack Logo" class="logo-img" onerror="this.parentNode.style.display='none'">
+                </div>
+                <h1>NEXTRACK</h1>
+                <p class="tagline">Pakistan's First AI Powered Home Construction Assistant</p>
+            </div>
+
+            <div class="search-container">
+                <div class="search-bar">
+                    <span class="plus-icon">+</span>
+                    <input type="text" placeholder="Ask anything about your project..." id="searchInput">
+                    <button class="send-btn">↑</button>
+                </div>
+            </div>
+
+            <div class="suggestions">
+                <button class="chip" id="calculateBudgetChip" onclick="window.location.href='calculate-budget.html'">Calculate Your House Budget</button>
+                <button class="chip" id="budgetTrackerChip" onclick="window.location.href='budget-tracking-system.html'">Track Your Real-Time Construction Budget</button>
+                <button class="chip" id="qualityChecklistChip" onclick="window.location.href='quality-checklist.html'">Track Construction Quality of Your Project</button>
+                <button class="chip" id="progressTimelineChip" onclick="window.location.href='progress-timeline.html'">Track Real-Time Progress of Your Project</button>
+            </div>
+
+            <!-- Project at a glance (reads data saved by the Timeline and Checklist pages) -->
+            <div class="glance-wrap">
+                <div class="glance-title">Your project at a glance</div>
+                <div class="glance">
+                    <a class="g-card" href="calculate-budget.html">
+                        <div class="g-top"><span class="g-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h8M8 14h4"/></svg></span>Budget estimate</div>
+                        <div class="g-val sm">From Rs 3,100 / sqft</div>
+                        <div class="g-sub">4 packages &middot; floor-wise breakdown</div>
+                        <div class="g-link">Calculate my budget ›</div>
+                    </a>
+                    <a class="g-card" href="budget-tracking-system.html">
+                        <div class="g-top"><span class="g-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></span>Budget tracking</div>
+                        <div class="g-val"><span id="gBud">0%</span><span style="font-size:14px;color:#8A8A8A;font-weight:600"> spent</span></div>
+                        <div class="g-sub" id="gBudSub">Rs 0 of 125 Lacs</div>
+                        <div class="g-bar"><i id="gBudBar" style="width:0"></i></div>
+                    </a>
+                    <a class="g-card" href="progress-timeline.html">
+                        <div class="g-top"><span class="g-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h10M4 12h16M4 18h7"/></svg></span>Project progress</div>
+                        <div class="g-val" id="gProg">0%</div>
+                        <div class="g-sub" id="gProgSub">Grey 0% · Finishing 0%</div>
+                        <div class="g-sub" id="gNext" style="color:#0D5C4D;font-weight:600">Next: Site Handover &amp; Mobilization</div>
+                        <div class="g-bar two"><span><i id="gGrey" style="width:0"></i></span><span><i id="gFin" style="width:0"></i></span></div>
+                    </a>
+                    <a class="g-card" href="quality-checklist.html">
+                        <div class="g-top"><span class="g-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Quality checks</div>
+                        <div class="g-val"><span id="gQc">0</span><span style="font-size:14px;color:#8A8A8A;font-weight:600"> / 145</span></div>
+                        <div class="g-sub" id="gQcSub">0 of 25 checklists completed</div>
+                        <div class="g-bar"><i id="gQcBar" style="width:0"></i></div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile dock: 4 quick links (shown on phones only) -->
+            <nav class="dock" aria-label="Quick pages">
+                <a href="calculate-budget.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h8M8 14h4"/></svg><span>Estimate</span></a>
+                <a href="budget-tracking-system.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg><span>Budget</span></a>
+                <a href="quality-checklist.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Quality</span></a>
+                <a href="progress-timeline.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h16M4 18h7"/></svg><span>Progress</span></a>
+            </nav>
+        </main>
+
+        <footer class="footer">
+            Residential Construction • AI-Powered Project Control
+        </footer>
+    </div>
+
+
+    <!-- ============ LOG IN / SIGN UP ============ -->
+    <div class="al-overlay" id="alOverlay" aria-hidden="true">
+        <div class="al-modal" role="dialog" aria-modal="true" aria-labelledby="alTitle">
+            <button class="al-close" type="button" id="alClose" aria-label="Close">×</button>
+            <div class="al-logo">N</div>
+
+            <div id="alChoose">
+                <h2 id="alTitle">Log in or sign up</h2>
+                <p class="al-sub">Save your projects, budget and checklists to your account.</p>
+                <button type="button" class="al-social" data-provider="google"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span>Continue with Google</span></button>
+                <button type="button" class="al-social" data-provider="facebook"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#1877F2"/><path fill="#fff" d="M13.4 19v-6.2h2.1l.4-2.5h-2.5V8.7c0-.7.3-1.3 1.4-1.3h1.2V5.2c-.2 0-1-.1-1.9-.1-1.9 0-3.2 1.200-3.200 3.300v1.900H8.800v2.500h2.100V19z"/></svg><span>Continue with Facebook</span></button>
+                <button type="button" class="al-social" data-provider="x"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#000" d="M18.200 2.300h3.300l-7.200 8.300 8.500 11.200h-6.700l-5.200-6.800-6 6.800H1.600l7.700-8.800L1.200 2.300H8l4.700 6.200zm-1.200 17.500h1.800L7.100 4.200H5.100z"/></svg><span>Continue with X</span></button>
+                <div class="al-or"><span>or</span></div>
+                <button type="button" class="al-primary" id="alEmailBtn"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span>Continue with email</span></button>
+            </div>
+
+            <form id="alEmailForm" novalidate hidden>
+                <button type="button" class="al-back" id="alBack">‹ Back</button>
+                <h2 id="alFormTitle">Log in with email</h2>
+                <p class="al-sub" id="alFormSub">Welcome back. Enter your details.</p>
+                <div class="al-field" id="alNameField" hidden><label for="alName">Full name</label><input id="alName" autocomplete="name" placeholder="e.g. Ahmed Khan"></div>
+                <div class="al-field"><label for="alEmail">Email</label><input id="alEmail" type="email" autocomplete="username" placeholder="you@example.com"></div>
+                <div class="al-field"><label for="alPass">Password</label><input id="alPass" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+                <p class="al-err" id="alErr" aria-live="polite"></p>
+                <button type="submit" class="al-primary" id="alSubmit"><span>Log in</span></button>
+                <p class="al-switch" id="alSwitch"></p>
+            </form>
+            <p class="al-note">Demo sign-in: it is saved in this browser only.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
